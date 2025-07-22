@@ -93,4 +93,4 @@ Confira nosso protótipo detalhado no link anexado abaixo:
 ## 📝 Backlog
 
 -   Acompanhe o desenvolvimento no [Trello](https://trello.com/b/j0K7juHK/gdu)
--   Confira os detalhes no documento de [Entrega 1](./docs/entrega1.pdf).
+-   Confira os detalhes no documento de [Entrega 1](./docs/Entrega1.pdf).

@@ -1,4 +1,4 @@
-import 'package:fin_plus/Views/HomePage.dart';
+import 'package:fin_plus/ui/home/HomePage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 

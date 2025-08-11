@@ -1,5 +1,5 @@
-import 'package:fin_plus/Config/Theme/Theme.dart';
-import 'package:fin_plus/Config/routes.dart';
+import 'ui/core/themes/Theme.dart';
+import 'routing/routes.dart';
 import 'package:flutter/material.dart';
 
 void main() {

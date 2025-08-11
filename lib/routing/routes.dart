@@ -1,4 +1,4 @@
-import 'package:fin_plus/ui/home/HomePage.dart';
+import '/ui/core/ui/CadastroView.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,7 +17,7 @@ class AppRoutes {
       GoRoute(
         path: '/',
         builder: (BuildContext context, GoRouterState state) {
-          return const HomePage(); // Widget da tela inicial
+          return CriarConta(); // Widget da tela inicial
         },
       ),
       

@@ -1,7 +1,7 @@
-import 'package:fin_plus/ui/core/ui/UsuarioViewModel.dart';
-import 'package:fin_plus/ui/home/HomePage.dart';
+import 'package:fin_plus/ui/UsuarioViewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 //import 'auth_service.dart'; onde está o método signInWithGoogle()
 
 
@@ -103,10 +103,7 @@ class CadastroView extends State<CriarConta> {
                         _senhaController.text,
                         1,
                       );
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const HomePage())
-                      );
+                      context.go('/navigator');
                     }
 
                   },

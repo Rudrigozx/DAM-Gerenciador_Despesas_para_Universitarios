@@ -16,10 +16,7 @@ class MinhasMetasView extends StatelessWidget {
       create: (_) => MinhasMetasViewModel(MockMetaRepositoryImpl())..fetchMetas(),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Minhas Metas', style: TextStyle(fontWeight: FontWeight.bold)),
-          elevation: 0,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
+          title: const Text('Minhas Metas'),
         ),
         body: Consumer<MinhasMetasViewModel>(
           builder: (context, viewModel, child) {
@@ -41,7 +38,6 @@ class MinhasMetasView extends StatelessWidget {
               Provider.of<MinhasMetasViewModel>(context, listen: false).fetchMetas();
             });
           },
-          backgroundColor: Colors.green,
           child: const Icon(Icons.add),
         ),
       ),
@@ -64,10 +60,7 @@ class MinhasMetasView extends StatelessWidget {
               label: Text(category),
               selected: isSelected,
               onSelected: (_) => viewModel.selectCategory(category),
-              selectedColor: Colors.green,
-              labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black),
-              backgroundColor: Colors.grey[200],
-              shape: StadiumBorder(),
+              // O tema cuida das cores e estilos de texto
             );
           },
           separatorBuilder: (_, __) => const SizedBox(width: 8),

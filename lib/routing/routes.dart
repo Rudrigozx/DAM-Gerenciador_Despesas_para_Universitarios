@@ -1,4 +1,6 @@
-import '/ui/core/ui/CadastroView.dart';
+import 'package:fin_plus/ui/core/main_navigation_view.dart';
+
+import '../ui/CadastroView.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -18,6 +20,12 @@ class AppRoutes {
         path: '/',
         builder: (BuildContext context, GoRouterState state) {
           return CriarConta(); // Widget da tela inicial
+        },
+      ),
+      GoRoute(
+        path: '/navigator',
+        builder: (BuildContext context, GoRouterState state) {
+          return MainNavigationView(); // Widget da tela inicial
         },
       ),
       

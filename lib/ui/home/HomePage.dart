@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage> {
 
             ElevatedButton(
               onPressed: () {
-                context.pushNamed('new-expense');
+                context.pushNamed('expenses-list');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,

@@ -1,8 +1,10 @@
 // routes.dart
+import 'package:fin_plus/ui/home/HomePage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../Models/transaction_data.dart';
+import '../ui/expenses_list/ExpensesListPage.dart';
 import '../ui/transactions/TransactionsPage.dart';
 import '/ui/core/ui/CadastroView.dart';
 
@@ -16,7 +18,6 @@ class AppRoutes {
 
     // Lista de todas as rotas da nossa aplicação
     routes: <RouteBase>[
-      
       // Rota para a HomeScreen
       GoRoute(
         path: '/',
@@ -24,7 +25,19 @@ class AppRoutes {
           return CriarConta();
         },
       ),
-
+      GoRoute(
+        path: '/home',
+        name: 'home',
+        builder: (BuildContext context, GoRouterState state) {
+          return HomePage();
+        },
+      ),
+      // Tela de listagem de despesas
+      GoRoute(
+        path: '/expenses',
+        name: 'expenses-list',
+        builder: (context, state) => const ExpensesListPage(),
+      ),
       GoRoute(
         path: '/transaction/income/new',
         name: 'new-income',

@@ -3,20 +3,29 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../Models/transaction_data.dart';
+import '../../../Models/transaction_data.dart';
+import '../../data/repositories/TransactionRepository.dart';
 
 // Enum para o controle de repetição
 enum Repetition { none, fixed, installment }
 
 class TransactionsPage extends StatefulWidget {
   final TransactionType initialType;
-  const TransactionsPage({super.key, required this.initialType});
+  final Transaction? transactionToEdit; // Recebe a transação para edição
+
+  const TransactionsPage({
+    super.key,
+    required this.initialType,
+    this.transactionToEdit,
+  });
 
   @override
   State<TransactionsPage> createState() => _TransactionsPageState();
 }
 
 class _TransactionsPageState extends State<TransactionsPage> with SingleTickerProviderStateMixin {
+  final TransactionRepository _repository = TransactionRepository();
+
   // Controllers
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
@@ -32,19 +41,32 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
   bool _isLoading = false;
 
   // Dados Mock (simulados)
-  final List<String> categories = ['Viagem', 'Alimentação', 'Salário', 'Lazer', 'Moradia'];
+  final List<String> categories = ['Transporte', 'Material', 'Aluguel', 'Crédito', 'Alimentação', 'Salário', 'Lazer'];
   final List<String> accounts = ['Carteira', 'Conta Corrente', 'Cartão de Crédito', 'Reserva'];
 
   @override
   void initState() {
     super.initState();
     _currentType = widget.initialType;
+
     _tabController = TabController(
       length: 3,
       vsync: this,
       initialIndex: _currentType.index,
     );
     _tabController.addListener(_handleTabSelection);
+
+    if (widget.transactionToEdit != null) {
+      final tx = widget.transactionToEdit!;
+      _currentType = tx.type;
+      descriptionController.text = tx.description;
+      amountController.text = tx.amount.toStringAsFixed(2).replaceAll('.', ',');
+      _selectedDate = tx.date;
+      _selectedCategory = tx.category;
+      _selectedSourceAccount = tx.sourceAccount;
+      _selectedDestinationAccount = tx.destinationAccount;
+      _tabController.index = tx.type.index; // Sincroniza a aba visualmente
+    }
   }
 
   void _handleTabSelection() {
@@ -79,13 +101,9 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
     final yesterday = today.subtract(const Duration(days: 1));
     final selectedDay = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
 
-    if (selectedDay == today) {
-      return 'Hoje';
-    } else if (selectedDay == yesterday) {
-      return 'Ontem';
-    } else {
-      return DateFormat('dd/MM/yyyy').format(_selectedDate);
-    }
+    if (selectedDay == today) return 'Hoje';
+    if (selectedDay == yesterday) return 'Ontem';
+    return DateFormat('dd/MM/yyyy').format(_selectedDate);
   }
 
   // --- Funções de Ação ---
@@ -97,15 +115,34 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
       lastDate: DateTime(2030),
     );
     if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
+      setState(() => _selectedDate = picked);
     }
   }
 
-  Future<void> saveTransaction() async {
+  Future<void> saveOrUpdateTransaction() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
+
+    final amount = double.tryParse(amountController.text.replaceAll(',', '.')) ?? 0.0;
+
+    // Cria o objeto com os dados atuais da tela
+    final transaction = Transaction(
+      id: widget.transactionToEdit?.id, // Usa o ID existente se estiver editando
+      description: descriptionController.text,
+      amount: amount,
+      category: _selectedCategory ?? 'Nenhuma',
+      type: _currentType,
+      date: _selectedDate,
+      sourceAccount: _selectedSourceAccount,
+      destinationAccount: _selectedDestinationAccount,
+    );
+
+    // Decide se deve criar um novo ou atualizar um existente
+    if (widget.transactionToEdit == null) {
+      await _repository.addTransaction(transaction);
+    } else {
+      await _repository.updateTransaction(transaction);
+    }
+
     if (mounted) context.pop();
   }
 
@@ -117,15 +154,13 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
           SliverAppBar(
             automaticallyImplyLeading: true,
             pinned: true,
-            expandedHeight: 220.0, // Aumentei um pouco a altura para melhor espaçamento
+            expandedHeight: 220.0,
             backgroundColor: headerColor,
             flexibleSpace: FlexibleSpaceBar(
               background: SafeArea(
                 child: Column(
-                  // 1. Alinhamento alterado para 'end' (fim)
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    // 2. TabBar continua aqui
                     TabBar(
                       controller: _tabController,
                       indicatorColor: Colors.white,
@@ -141,16 +176,11 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
                         Tab(text: 'TRANSFERÊNCIA'),
                       ],
                     ),
-                    // 3. Campo de valor com espaçamento ajustado
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                       child: TextFormField(
                         controller: amountController,
-                        style: const TextStyle(
-                            fontSize: 48,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold
-                        ),
+                        style: const TextStyle(fontSize: 48, color: Colors.white, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         decoration: const InputDecoration(
@@ -175,18 +205,15 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
                 children: [
                   TextFormField(
                     controller: descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Descrição',
-                      icon: Icon(Icons.edit_outlined),
-                    ),
+                    decoration: const InputDecoration(labelText: 'Descrição', icon: Icon(Icons.edit_outlined)),
                   ),
                   const SizedBox(height: 16),
 
                   _buildInputRow(
                     icon: Icons.category_outlined,
                     label: 'Categoria',
-                    value: _selectedCategory ?? 'Nenhuma',
-                    onTap: () { /* TODO: Abrir seletor de categoria */ },
+                    value: _selectedCategory ?? 'Selecione',
+                    onTap: () { /* TODO: Implementar seletor de categoria */ },
                   ),
 
                   if (_currentType == TransactionType.income)
@@ -194,7 +221,7 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
                       icon: Icons.account_balance_wallet_outlined,
                       label: 'Depositar em',
                       value: _selectedDestinationAccount ?? 'Selecione',
-                      onTap: () { /* TODO: Abrir seletor de conta */ },
+                      onTap: () { /* TODO: Implementar seletor de conta */ },
                     ),
 
                   if (_currentType == TransactionType.expense)
@@ -202,7 +229,7 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
                       icon: Icons.payment_outlined,
                       label: 'Pagar com',
                       value: _selectedSourceAccount ?? 'Selecione',
-                      onTap: () { /* TODO: Abrir seletor de conta */ },
+                      onTap: () { /* TODO: Implementar seletor de conta */ },
                     ),
 
                   if (_currentType == TransactionType.transfer) ...[
@@ -210,13 +237,13 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
                       icon: Icons.arrow_upward_outlined,
                       label: 'Conta de Origem',
                       value: _selectedSourceAccount ?? 'Selecione',
-                      onTap: () { /* TODO: Abrir seletor de conta */ },
+                      onTap: () { /* TODO: Implementar seletor de conta */ },
                     ),
                     _buildInputRow(
                       icon: Icons.arrow_downward_outlined,
                       label: 'Conta de Destino',
                       value: _selectedDestinationAccount ?? 'Selecione',
-                      onTap: () { /* TODO: Abrir seletor de conta */ },
+                      onTap: () { /* TODO: Implementar seletor de conta */ },
                     ),
                   ],
 
@@ -238,11 +265,7 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
                         _repetition == Repetition.fixed,
                         _repetition == Repetition.installment,
                       ],
-                      onPressed: (index) {
-                        setState(() {
-                          _repetition = Repetition.values[index];
-                        });
-                      },
+                      onPressed: (index) => setState(() => _repetition = Repetition.values[index]),
                       borderRadius: BorderRadius.circular(8.0),
                       children: const [
                         Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Não Repetir')),
@@ -258,7 +281,7 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _isLoading ? null : saveTransaction,
+        onPressed: _isLoading ? null : saveOrUpdateTransaction,
         backgroundColor: headerColor,
         child: _isLoading
             ? const CircularProgressIndicator(color: Colors.white)

@@ -1,6 +1,4 @@
-import 'package:intl/date_symbol_data_file.dart' hide initializeDateFormatting;
 import 'package:intl/date_symbol_data_local.dart';
-
 import 'data/services/DatabaseService.dart';
 import 'ui/core/themes/Theme.dart';
 import 'routing/routes.dart';

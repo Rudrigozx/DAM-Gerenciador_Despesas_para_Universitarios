@@ -1,88 +1,81 @@
-<<<<<<< HEAD
 import 'package:fin_plus/ui/core/main_navigation_view.dart';
-
 import '../ui/CadastroView.dart';
-=======
-// routes.dart
 import 'package:fin_plus/ui/home/HomePage.dart';
->>>>>>> main
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
 import '../Models/transaction_data.dart';
 import '../ui/expenses_list/ExpensesListPage.dart';
 import '../ui/transactions/TransactionsPage.dart';
-import '/ui/core/ui/CadastroView.dart';
-
 
 class AppRoutes {
-  // Instância do GoRouter para ser usada no MaterialApp
+  // Instância do GoRouter para ser usada no MaterialApp.router
   static final GoRouter router = GoRouter(
-
     // Rota inicial da aplicação
     initialLocation: '/',
 
     // Lista de todas as rotas da nossa aplicação
     routes: <RouteBase>[
-      // Rota para a HomeScreen
+      // Rota para a tela de Cadastro/Login (tela inicial)
       GoRoute(
         path: '/',
+        name: 'root', // É uma boa prática nomear todas as rotas
         builder: (BuildContext context, GoRouterState state) {
-          return CriarConta();
+          return const CriarConta(); // Recomendo usar 'const' se o widget for imutável
         },
       ),
+
+      // Rota para a tela principal que contém a Bottom Navigation
       GoRoute(
-<<<<<<< HEAD
         path: '/navigator',
+        name: 'navigator',
         builder: (BuildContext context, GoRouterState state) {
-          return MainNavigationView(); // Widget da tela inicial
+          return const MainNavigationView();
         },
       ),
-      
-=======
+
+      // Rota para a HomePage (provavelmente uma das telas dentro do Navigator)
+      GoRoute(
         path: '/home',
         name: 'home',
         builder: (BuildContext context, GoRouterState state) {
-          return HomePage();
+          return const HomePage();
         },
       ),
+
       // Tela de listagem de despesas
       GoRoute(
         path: '/expenses',
         name: 'expenses-list',
         builder: (context, state) => const ExpensesListPage(),
       ),
+
+      // Rotas agrupadas para criação de transações
       GoRoute(
-        path: '/transaction/income/new',
-        name: 'new-income',
+        path: '/transaction/:type/new', // Rota com parâmetro dinâmico
+        name: 'new-transaction',
         builder: (BuildContext context, GoRouterState state) {
-          return TransactionsPage(initialType: TransactionType.income);
+          // Obtém o tipo da URL e o converte para o enum
+          final typeString = state.pathParameters['type']!;
+          final type = TransactionType.values.firstWhere(
+            (e) => e.name == typeString,
+            orElse: () => TransactionType.expense, // Valor padrão em caso de erro
+          );
+          return TransactionsPage(initialType: type);
         },
       ),
-
-      GoRoute(
-        path: '/transaction/expense/new',
-        name: 'new-expense',
-        builder: (BuildContext context, GoRouterState state) {
-          return TransactionsPage(initialType: TransactionType.expense);
-        },
-      ),
-
-      GoRoute(
-        path: '/transaction/transfer/new',
-        name: 'new-transfer',
-        builder: (BuildContext context, GoRouterState state) {
-          return TransactionsPage(initialType: TransactionType.transfer);
-        },
-      ),
-
->>>>>>> main
     ],
 
+    // Página de erro para rotas não encontradas
     errorBuilder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('Página não encontrada')),
       body: Center(
-        child: Text('Erro: ${state.error?.message}'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('A rota que você tentou acessar não existe.'),
+            Text('Erro: ${state.error?.message ?? 'Rota inválida'}'),
+          ],
+        ),
       ),
     ),
   );

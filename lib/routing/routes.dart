@@ -1,11 +1,14 @@
+
+
+
+import 'package:fin_plus/Models/transaction_data.dart';
+import 'package:fin_plus/ui/CadastroView.dart';
 import 'package:fin_plus/ui/core/main_navigation_view.dart';
-import '../ui/CadastroView.dart';
+import 'package:fin_plus/ui/expenses_list/ExpensesListPage.dart';
 import 'package:fin_plus/ui/home/HomePage.dart';
+import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../Models/transaction_data.dart';
-import '../ui/expenses_list/ExpensesListPage.dart';
-import '../ui/transactions/TransactionsPage.dart';
 
 class AppRoutes {
   // Instância do GoRouter para ser usada no MaterialApp.router
@@ -18,16 +21,16 @@ class AppRoutes {
       // Rota para a tela de Cadastro/Login (tela inicial)
       GoRoute(
         path: '/',
-        name: 'root', // É uma boa prática nomear todas as rotas
+        name: 'signup',
         builder: (BuildContext context, GoRouterState state) {
-          return const CriarConta(); // Recomendo usar 'const' se o widget for imutável
+          return const CriarConta(); // Sugestão de novo nome de classe
         },
       ),
 
       // Rota para a tela principal que contém a Bottom Navigation
       GoRoute(
-        path: '/navigator',
-        name: 'navigator',
+        path: '/main',
+        name: 'main',
         builder: (BuildContext context, GoRouterState state) {
           return const MainNavigationView();
         },
@@ -38,7 +41,7 @@ class AppRoutes {
         path: '/home',
         name: 'home',
         builder: (BuildContext context, GoRouterState state) {
-          return const HomePage();
+          return const HomePage(); 
         },
       ),
 
@@ -46,7 +49,7 @@ class AppRoutes {
       GoRoute(
         path: '/expenses',
         name: 'expenses-list',
-        builder: (context, state) => const ExpensesListPage(),
+        builder: (context, state) => const ExpensesListPage(), 
       ),
 
       // Rotas agrupadas para criação de transações

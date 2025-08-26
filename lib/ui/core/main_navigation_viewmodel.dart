@@ -1,5 +1,5 @@
 // lib/ui/core/main_navigation_viewmodel.dart
-import 'package:fin_plus/ui/metas/minhas_metas_view.dart';
+import 'package:fin_plus/ui/goals/my_goals_view.dart';
 import 'package:flutter/material.dart';
 import '../placeholders/carteira_placeholder_view.dart';
 import '../placeholders/home_placeholder_view.dart';
@@ -14,7 +14,7 @@ class MainNavigationViewModel extends ChangeNotifier {
   // A ordem DEVE corresponder à ordem dos itens na BottomNavigationBar.
   final List<Widget> _screens = [
     const HomePlaceholderView(),
-    const MinhasMetasView(), // Nossa tela já existente!
+    const MyGoalsView(), // Nossa tela já existente!
     const TransacoesPlaceholderView(),
     const CarteiraPlaceholderView(),
   ];

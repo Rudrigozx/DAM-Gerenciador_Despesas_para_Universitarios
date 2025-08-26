@@ -1,24 +1,25 @@
-// lib/ui/home/minhas_metas_view.dart
-import 'package:fin_plus/data/repositories/mock_meta_repository_impl.dart';
+// lib/ui/home/my_goals_view.dart
+import 'package:fin_plus/data/repositories/goal_repository.dart';
+import 'package:fin_plus/data/repositories/mock_goal_repository_impl.dart';
+import 'package:fin_plus/ui/goals/my_goals_viewModel.dart';
+import 'package:fin_plus/ui/widgets/goal_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../widgets/meta_card.dart';
-import 'minhas_metas_viewmodel.dart';
-import 'nova_meta_view.dart';
+import 'new_goal_view.dart';
 
-class MinhasMetasView extends StatelessWidget {
-  const MinhasMetasView({super.key});
+class MyGoalsView extends StatelessWidget {
+  const MyGoalsView({super.key});
 
   @override
   Widget build(BuildContext context) {
     // Injeta o ViewModel na árvore de widgets
     return ChangeNotifierProvider(
-      create: (_) => MinhasMetasViewModel(MockMetaRepositoryImpl())..fetchMetas(),
+      create: (_) => MyGoalsViewModel(MockGoalRepositoryImpl() as IGoalRepository)..fetchGoals(),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Minhas Metas'),
         ),
-        body: Consumer<MinhasMetasViewModel>(
+        body: Consumer<MyGoalsViewModel>(
           builder: (context, viewModel, child) {
             return Column(
               children: [
@@ -32,10 +33,10 @@ class MinhasMetasView extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const NovaMetaView()),
+              MaterialPageRoute(builder: (context) => const NewGoalView()),
             ).then((_) {
               // Recarrega as metas quando voltar da tela de criação
-              Provider.of<MinhasMetasViewModel>(context, listen: false).fetchMetas();
+              Provider.of<MyGoalsViewModel>(context, listen: false).fetchGoals();
             });
           },
           child: const Icon(Icons.add),
@@ -44,7 +45,7 @@ class MinhasMetasView extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryFilters(BuildContext context, MinhasMetasViewModel viewModel) {
+  Widget _buildCategoryFilters(BuildContext context, MyGoalsViewModel viewModel) {
     const categories = ['Todas', 'Viagens', 'Estudos', 'Veículo'];
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -69,22 +70,22 @@ class MinhasMetasView extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, MinhasMetasViewModel viewModel) {
+  Widget _buildBody(BuildContext context, MyGoalsViewModel viewModel) {
     if (viewModel.state == ViewState.loading) {
       return const Center(child: CircularProgressIndicator());
     }
     if (viewModel.state == ViewState.error) {
       return const Center(child: Text('Ocorreu um erro ao buscar suas metas.'));
     }
-    if (viewModel.filteredMetas.isEmpty) {
-        return const Center(child: Text('Nenhuma meta encontrada.'));
+    if (viewModel.filteredGoals.isEmpty) {
+      return const Center(child: Text('Nenhuma meta encontrada.'));
     }
     return ListView.builder(
       padding: const EdgeInsets.all(16.0),
-      itemCount: viewModel.filteredMetas.length,
+      itemCount: viewModel.filteredGoals.length,
       itemBuilder: (context, index) {
-        final meta = viewModel.filteredMetas[index];
-        return MetaCard(meta: meta);
+        final goal = viewModel.filteredGoals[index];
+        return GoalCard(goal: goal);
       },
     );
   }

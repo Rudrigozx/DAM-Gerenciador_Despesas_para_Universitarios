@@ -1,11 +1,13 @@
+// lib/ui/widgets/goal_card.dart
 import 'package:flutter/material.dart';
-import '../../domain/models/meta_model.dart';
+import '../../domain/models/goal_model.dart';
 
-class MetaCard extends StatelessWidget {
-  final Meta meta;
-  const MetaCard({super.key, required this.meta});
+class GoalCard extends StatelessWidget {
+  final Goal goal;
+  const GoalCard({super.key, required this.goal});
 
   IconData _getIconForCategory(String category) {
+    // As categorias aqui permanecem em português para corresponder aos dados
     switch (category) {
       case 'Viagens': return Icons.airplanemode_active;
       case 'Estudos': return Icons.school;
@@ -27,16 +29,16 @@ class MetaCard extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            Icon(_getIconForCategory(meta.categoria), size: 30, color: theme.colorScheme.onSurface.withOpacity(0.6)),
+            Icon(_getIconForCategory(goal.category), size: 30, color: theme.colorScheme.onSurface.withOpacity(0.6)),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(meta.descricao, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(goal.description, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
                   Text(
-                    'R\$ ${meta.valorAtual.toStringAsFixed(2)} / R\$ ${meta.valorObjetivo.toStringAsFixed(2)}',
+                    'R\$ ${goal.currentAmount.toStringAsFixed(2)} / R\$ ${goal.targetAmount.toStringAsFixed(2)}',
                     style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 8),
@@ -44,7 +46,7 @@ class MetaCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: LinearProgressIndicator(
-                          value: meta.progresso,
+                          value: goal.progress,
                           backgroundColor: theme.colorScheme.surfaceVariant, // Cor de fundo da barra
                           color: theme.colorScheme.primary, // Cor de progresso da barra
                           minHeight: 8,
@@ -53,7 +55,7 @@ class MetaCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '${(meta.progresso * 100).toStringAsFixed(1)}%',
+                        '${(goal.progress * 100).toStringAsFixed(1)}%',
                         style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],

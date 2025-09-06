@@ -1,6 +1,5 @@
 // lib/ui/home/my_goals_view.dart
-import 'package:fin_plus/data/repositories/goal_repository.dart';
-import 'package:fin_plus/data/repositories/mock_goal_repository_impl.dart';
+import 'package:fin_plus/data/repositories/sql_goal_repository_impl.dart';
 import 'package:fin_plus/ui/goals/my_goals_viewModel.dart';
 import 'package:fin_plus/ui/widgets/goal_card.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,7 @@ class MyGoalsView extends StatelessWidget {
   Widget build(BuildContext context) {
     // Injeta o ViewModel na árvore de widgets
     return ChangeNotifierProvider(
-      create: (_) => MyGoalsViewModel(MockGoalRepositoryImpl() as IGoalRepository)..fetchGoals(),
+      create: (_) => MyGoalsViewModel(SqlGoalRepositoryImpl())..fetchGoals(),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Minhas Metas'),

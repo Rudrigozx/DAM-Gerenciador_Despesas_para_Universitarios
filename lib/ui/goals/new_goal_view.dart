@@ -1,6 +1,7 @@
 // lib/ui/home/new_goal_view.dart
+
 import 'package:fin_plus/data/repositories/goal_repository.dart';
-import 'package:fin_plus/data/repositories/mock_goal_repository_impl.dart';
+import 'package:fin_plus/data/repositories/sql_goal_repository_impl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +13,7 @@ class NewGoalView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => NewGoalViewModel(MockGoalRepositoryImpl() as IGoalRepository),
+      create: (_) => NewGoalViewModel(SqlGoalRepositoryImpl() as IGoalRepository),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Nova Meta'), // Texto da UI em português

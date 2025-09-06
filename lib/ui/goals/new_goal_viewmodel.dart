@@ -34,7 +34,6 @@ class NewGoalViewModel extends ChangeNotifier {
       final targetAmount = double.tryParse(targetAmountController.text) ?? 0.0;
       
       final newGoal = Goal(
-        id: '', // O repositório irá gerar o ID
         description: descriptionController.text,
         category: _selectedCategory,
         targetAmount: targetAmount,

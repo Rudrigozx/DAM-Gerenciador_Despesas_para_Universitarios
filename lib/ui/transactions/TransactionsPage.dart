@@ -4,14 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../Models/transaction_data.dart';
+import '../../Models/category.dart';
 import '../../data/repositories/TransactionRepository.dart';
+import '../../data/repositories/category_repository.dart';
 
 // Enum para o controle de repetição
 enum Repetition { none, fixed, installment }
 
 class TransactionsPage extends StatefulWidget {
   final TransactionType initialType;
-  final Transaction? transactionToEdit; // Recebe a transação para edição
+  final Transaction? transactionToEdit;
 
   const TransactionsPage({
     super.key,
@@ -24,7 +26,9 @@ class TransactionsPage extends StatefulWidget {
 }
 
 class _TransactionsPageState extends State<TransactionsPage> with SingleTickerProviderStateMixin {
-  final TransactionRepository _repository = TransactionRepository();
+  // Repositórios
+  final TransactionRepository _transactionRepository = TransactionRepository();
+  final CategoryRepository _categoryRepository = CategoryRepository();
 
   // Controllers
   final TextEditingController descriptionController = TextEditingController();
@@ -34,20 +38,23 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
   // Variáveis de Estado
   late TransactionType _currentType;
   DateTime _selectedDate = DateTime.now();
-  String? _selectedCategory;
+  Category? _selectedCategory; // Armazena o objeto Category completo
   String? _selectedSourceAccount;
   String? _selectedDestinationAccount;
   Repetition _repetition = Repetition.none;
   bool _isLoading = false;
 
-  // Dados Mock (simulados)
-  final List<String> categories = ['Transporte', 'Material', 'Aluguel', 'Crédito', 'Alimentação', 'Salário', 'Lazer'];
+  // Lista de categorias carregadas do DB
+  List<Category> _availableCategories = [];
+
+  // Lista mockada para as contas
   final List<String> accounts = ['Carteira', 'Conta Corrente', 'Cartão de Crédito', 'Reserva'];
 
   @override
   void initState() {
     super.initState();
     _currentType = widget.initialType;
+    _loadInitialData();
 
     _tabController = TabController(
       length: 3,
@@ -55,18 +62,30 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
       initialIndex: _currentType.index,
     );
     _tabController.addListener(_handleTabSelection);
+  }
 
-    if (widget.transactionToEdit != null) {
-      final tx = widget.transactionToEdit!;
-      _currentType = tx.type;
-      descriptionController.text = tx.description;
-      amountController.text = tx.amount.toStringAsFixed(2).replaceAll('.', ',');
-      _selectedDate = tx.date;
-      _selectedCategory = tx.category;
-      _selectedSourceAccount = tx.sourceAccount;
-      _selectedDestinationAccount = tx.destinationAccount;
-      _tabController.index = tx.type.index; // Sincroniza a aba visualmente
-    }
+  Future<void> _loadInitialData() async {
+    final categories = await _categoryRepository.getAllCategories();
+    setState(() {
+      _availableCategories = categories;
+
+      if (widget.transactionToEdit != null) {
+        final tx = widget.transactionToEdit!;
+        _currentType = tx.type;
+        descriptionController.text = tx.description;
+        amountController.text = tx.amount.toStringAsFixed(2).replaceAll('.', ',');
+        _selectedDate = tx.date;
+        _selectedSourceAccount = tx.sourceAccount;
+        _selectedDestinationAccount = tx.destinationAccount;
+        _tabController.index = tx.type.index;
+
+        try {
+          _selectedCategory = _availableCategories.firstWhere((cat) => cat.name == tx.category);
+        } catch (e) {
+          _selectedCategory = null;
+        }
+      }
+    });
   }
 
   void _handleTabSelection() {
@@ -86,7 +105,7 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
     super.dispose();
   }
 
-  // --- Getters para Lógica de UI ---
+  // --- Getters e Funções de Ação ---
   Color get headerColor {
     switch (_currentType) {
       case TransactionType.income: return Colors.green;
@@ -119,17 +138,71 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
     }
   }
 
+  Future<void> _showCategorySelectionDialog() async {
+    final selected = await showDialog<Category>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Selecione uma Categoria'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: _availableCategories.isEmpty
+              ? const Text('Nenhuma categoria cadastrada. Vá para a tela de gerenciar categorias para adicionar uma.')
+              : ListView.builder(
+            shrinkWrap: true,
+            itemCount: _availableCategories.length,
+            itemBuilder: (context, index) {
+              final category = _availableCategories[index];
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: category.color,
+                  child: Icon(category.icon, color: Colors.white, size: 20),
+                ),
+                title: Text(category.name),
+                onTap: () {
+                  Navigator.of(context).pop(category);
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Fecha o diálogo
+              context.push('/categories').then((_) => _loadInitialData()); // Navega e recarrega ao voltar
+            },
+
+            child: const Text('GERENCIAR'),
+          )
+        ],
+      ),
+    );
+
+    if (selected != null) {
+      setState(() {
+        _selectedCategory = selected;
+      });
+    }
+  }
+
   Future<void> saveOrUpdateTransaction() async {
+    if (_selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, selecione uma categoria.'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     final amount = double.tryParse(amountController.text.replaceAll(',', '.')) ?? 0.0;
 
     // Cria o objeto com os dados atuais da tela
     final transaction = Transaction(
-      id: widget.transactionToEdit?.id, // Usa o ID existente se estiver editando
+      id: widget.transactionToEdit?.id,
       description: descriptionController.text,
       amount: amount,
-      category: _selectedCategory ?? 'Nenhuma',
+      category: _selectedCategory!.name,
       type: _currentType,
       date: _selectedDate,
       sourceAccount: _selectedSourceAccount,
@@ -138,9 +211,9 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
 
     // Decide se deve criar um novo ou atualizar um existente
     if (widget.transactionToEdit == null) {
-      await _repository.addTransaction(transaction);
+      await _transactionRepository.addTransaction(transaction);
     } else {
-      await _repository.updateTransaction(transaction);
+      await _transactionRepository.updateTransaction(transaction);
     }
 
     if (mounted) context.pop();
@@ -210,27 +283,11 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
                   const SizedBox(height: 16),
 
                   _buildInputRow(
-                    icon: Icons.category_outlined,
+                    icon: _selectedCategory?.icon ?? Icons.category_outlined,
                     label: 'Categoria',
-                    value: _selectedCategory ?? 'Selecione',
-                    onTap: () { /* TODO: Implementar seletor de categoria */ },
+                    value: _selectedCategory?.name ?? 'Selecione',
+                    onTap: _showCategorySelectionDialog,
                   ),
-
-                  if (_currentType == TransactionType.income)
-                    _buildInputRow(
-                      icon: Icons.account_balance_wallet_outlined,
-                      label: 'Depositar em',
-                      value: _selectedDestinationAccount ?? 'Selecione',
-                      onTap: () { /* TODO: Implementar seletor de conta */ },
-                    ),
-
-                  if (_currentType == TransactionType.expense)
-                    _buildInputRow(
-                      icon: Icons.payment_outlined,
-                      label: 'Pagar com',
-                      value: _selectedSourceAccount ?? 'Selecione',
-                      onTap: () { /* TODO: Implementar seletor de conta */ },
-                    ),
 
                   if (_currentType == TransactionType.transfer) ...[
                     _buildInputRow(

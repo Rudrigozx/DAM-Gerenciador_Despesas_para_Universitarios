@@ -10,6 +10,8 @@ import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../ui/categories/category_list_page.dart';
+
 class AppRoutes {
   // Instância do GoRouter para ser usada no MaterialApp.router
   static final GoRouter router = GoRouter(
@@ -50,6 +52,12 @@ class AppRoutes {
         path: '/expenses',
         name: 'expenses-list',
         builder: (context, state) => const ExpensesListPage(), 
+      ),
+
+      GoRoute(
+        path: '/categories',
+        name: 'categories-list',
+        builder: (context, state) => const CategoryListPage(),
       ),
 
       // Rotas agrupadas para criação de transações

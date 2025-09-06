@@ -1,8 +1,10 @@
 
+import 'package:fin_plus/ui/expenses_list/ExpensesListViewModel.dart';
+import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../Models/transaction_data.dart';
+import '../../../Models/transaction_data.dart';
 import '../../data/repositories/TransactionRepository.dart';
 
 class ExpensesListPage extends StatefulWidget {
@@ -19,7 +21,6 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
   DateTime _selectedMonth = DateTime.now();
   List<Transaction> _transactions = [];
 
-  // Getter para agrupar as transações por dia
   Map<DateTime, List<Transaction>> get groupedTransactions {
     final map = <DateTime, List<Transaction>>{};
     for (var tx in _transactions) {
@@ -72,7 +73,6 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Detalhes da transação
               Text(transaction.description, style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 8),
               Text(
@@ -84,13 +84,17 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
               ),
               const Divider(height: 32),
 
-              // Mais detalhes em linhas
               _buildDetailRow('Data:', DateFormat('dd/MM/yyyy').format(transaction.date)),
               _buildDetailRow('Categoria:', transaction.category),
 
+              if (transaction.type != TransactionType.income)
+                _buildDetailRow('Conta de Origem:', transaction.sourceAccount ?? 'N/A'),
+
+              if (transaction.type != TransactionType.expense)
+                _buildDetailRow('Conta de Destino:', transaction.destinationAccount ?? 'N/A'),
+
               const SizedBox(height: 24),
 
-              // Botões de Ação
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -98,7 +102,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
                     icon: const Icon(Icons.edit_outlined),
                     label: const Text('EDITAR'),
                     onPressed: () async {
-                      Navigator.of(ctx).pop(); // Fecha o modal
+                      Navigator.of(ctx).pop();
                       await context.push('/transaction/edit/${transaction.id}');
                       fetchTransactions();
                     },
@@ -108,7 +112,7 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
                     label: const Text('EXCLUIR', style: TextStyle(color: Colors.red)),
                     onPressed: () {
                       deleteTransaction(transaction.id!);
-                      Navigator.of(ctx).pop(); // Fecha o modal
+                      Navigator.of(ctx).pop();
                     },
                   ),
                 ],
@@ -142,7 +146,6 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
       ),
       body: Column(
         children: [
-          // Seletor de Mês
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Row(
@@ -158,15 +161,24 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
             ),
           ),
 
-          // Lista de Transações
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _buildTransactionList(),
           ),
-
-          // TODO: Rodapé com totais
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const TransactionsPage(initialType: TransactionType.expense)),
+          ).then((_) {
+             fetchTransactions();
+          });
+          //fetchTransactions();
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -218,7 +230,6 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
   }
 
   IconData _getIconForCategory(String category) {
-    // Lógica simples para retornar um ícone com base na categoria
     switch (category.toLowerCase()) {
       case 'transporte': return Icons.directions_bus;
       case 'alimentação': return Icons.restaurant;

@@ -48,5 +48,14 @@ class DatabaseService {
         currentAmount REAL NOT NULL
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        iconCodePoint INTEGER NOT NULL,
+        colorValue INTEGER NOT NULL
+      )
+    ''');
   }
 }

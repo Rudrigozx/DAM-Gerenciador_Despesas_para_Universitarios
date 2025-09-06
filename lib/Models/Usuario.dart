@@ -1,11 +1,12 @@
 class Usuario {
   String _nome;
+  String _idade;
   String _email;
   String _senha;
   int _id;
 
 
-  Usuario(this._nome, this._email, this._senha, this._id);
+  Usuario(this._nome, this._idade, this._email, this._senha, this._id);
 
 
   String get nome => _nome;
@@ -19,20 +20,22 @@ class Usuario {
 
   String get email => _email;
   set email(String valor) {
-    if (valor.contains("@")) {
+    _email = valor;
+    /*if (valor.contains("@")) {
       _email = valor;
     } else {
       throw Exception("E-mail inválido.");
-    }
+    }*/
   }
 
   String get senha => _senha;
   set senha(String valor) {
-    if (valor.length >= 6) {
+    _senha = valor;
+    /*if (valor.length >= 6) {
       _senha = valor;
     } else {
       throw Exception("A senha deve ter pelo menos 6 caracteres.");
-    }
+    }*/
   }
 
   int get id => _id;
@@ -42,6 +45,16 @@ class Usuario {
     } else {
       throw Exception("Id inválido.");
     }
+  }
+
+  String get idade => _idade;
+  set idade(String valor) {
+    _idade = valor;
+    /*if (valor >= 0) {
+      _idade = valor;
+    } else {
+      throw Exception("Idade inválida.");
+    }*/
   }
 
 }

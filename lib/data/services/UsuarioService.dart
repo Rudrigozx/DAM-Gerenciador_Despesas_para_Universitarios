@@ -25,4 +25,11 @@ class UsuarioService {
       orElse: () => throw Exception("Usuário não encontrado."),
     );
   }
+
+  Usuario? buscarPorId(int id) {
+    return _usuarios.firstWhere(
+          (u) => u.id == id,
+      orElse: () => throw Exception("Usuário não encontrado."),
+    );
+  }
 }

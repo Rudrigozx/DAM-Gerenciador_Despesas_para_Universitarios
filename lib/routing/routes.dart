@@ -7,18 +7,23 @@ import 'package:fin_plus/ui/core/main_navigation_view.dart';
 import 'package:fin_plus/ui/expenses_list/ExpensesListPage.dart';
 import 'package:fin_plus/ui/home/HomePage.dart';
 import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
+import '../ui/core/ui/Login/CadastroView.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '/ui/home/HomePage.dart';
+
 
 class AppRoutes {
   // Instância do GoRouter para ser usada no MaterialApp.router
   static final GoRouter router = GoRouter(
+
     // Rota inicial da aplicação
     initialLocation: '/',
 
     // Lista de todas as rotas da nossa aplicação
     routes: <RouteBase>[
-      // Rota para a tela de Cadastro/Login (tela inicial)
+
+      // Rota para a HomeScreen
       GoRoute(
         path: '/',
         name: 'signup',
@@ -41,7 +46,7 @@ class AppRoutes {
         path: '/home',
         name: 'home',
         builder: (BuildContext context, GoRouterState state) {
-          return const HomePage(); 
+          return const HomePage();
         },
       ),
 
@@ -49,7 +54,7 @@ class AppRoutes {
       GoRoute(
         path: '/expenses',
         name: 'expenses-list',
-        builder: (context, state) => const ExpensesListPage(), 
+        builder: (context, state) => const ExpensesListPage(),
       ),
 
       // Rotas agrupadas para criação de transações

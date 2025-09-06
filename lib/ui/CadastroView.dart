@@ -103,7 +103,7 @@ class CadastroView extends State<CriarConta> {
                         _senhaController.text,
                         1,
                       );
-                      context.go('/navigator');
+                      context.go('/main');
                     }
 
                   },

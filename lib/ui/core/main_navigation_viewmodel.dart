@@ -1,4 +1,5 @@
 // lib/ui/core/main_navigation_viewmodel.dart
+import 'package:fin_plus/ui/expenses_list/ExpensesListPage.dart';
 import 'package:fin_plus/ui/goals/my_goals_view.dart';
 import 'package:flutter/material.dart';
 import '../placeholders/carteira_placeholder_view.dart';
@@ -15,7 +16,7 @@ class MainNavigationViewModel extends ChangeNotifier {
   final List<Widget> _screens = [
     const HomePlaceholderView(),
     const MyGoalsView(), // Nossa tela já existente!
-    const TransacoesPlaceholderView(),
+    const ExpensesListPage(),
     const CarteiraPlaceholderView(),
   ];
 

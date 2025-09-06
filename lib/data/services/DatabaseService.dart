@@ -38,5 +38,15 @@ class DatabaseService {
         destinationAccount TEXT
       )
     ''');
+    
+    await db.execute('''
+      CREATE TABLE goals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        description TEXT NOT NULL,
+        category TEXT NOT NULL,
+        targetAmount REAL NOT NULL,
+        currentAmount REAL NOT NULL
+      )
+    ''');
   }
 }

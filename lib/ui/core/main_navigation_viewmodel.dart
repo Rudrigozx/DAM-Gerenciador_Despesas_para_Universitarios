@@ -2,8 +2,9 @@
 import 'package:fin_plus/ui/expenses_list/ExpensesListPage.dart';
 import 'package:fin_plus/ui/goals/my_goals_view.dart';
 import 'package:flutter/material.dart';
-import '../placeholders/carteira_placeholder_view.dart';
 import '../placeholders/home_placeholder_view.dart';
+import '../wallets/wallet_list_page.dart';
+
 
 class MainNavigationViewModel extends ChangeNotifier {
   int _currentIndex = 0;
@@ -14,7 +15,7 @@ class MainNavigationViewModel extends ChangeNotifier {
     const HomePlaceholderView(),
     const MyGoalsView(),
     const ExpensesListPage(),
-    const CarteiraPlaceholderView(),
+    const WalletListPage(),
   ];
 
   final List<BottomNavigationBarItem> items = const [

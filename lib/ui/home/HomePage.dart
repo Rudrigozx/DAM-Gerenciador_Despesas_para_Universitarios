@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../utils/database_seeder.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -56,6 +58,25 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),
               child: const Text('Adicionar Transferência'),
+            ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.data_exploration_outlined),
+              label: const Text('DEV: Popular Banco de Dados'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+              onPressed: () async {
+                // Mostra um feedback para o usuário
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Populando o banco de dados... Por favor, aguarde.')),
+                );
+
+                // Chama o seeder
+                await DatabaseSeeder().seedDatabase();
+
+                // Mostra um feedback de conclusão
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Banco de dados populado com sucesso!'), backgroundColor: Colors.green),
+                );
+              },
             ),
           ],
         ),

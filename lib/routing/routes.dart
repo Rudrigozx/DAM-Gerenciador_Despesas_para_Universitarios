@@ -9,13 +9,15 @@ import 'package:fin_plus/ui/goals/my_goals_view.dart';
 import 'package:fin_plus/ui/goals/new_goal_view.dart';
 import 'package:fin_plus/ui/home/HomePage.dart';
 import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; // Added for Scaffold and AppBar
 import 'package:go_router/go_router.dart';
 import '../ui/categories/category_list_page.dart';
+import '../ui/wallets/wallet_list_page.dart';
 
 class AppRoutes {
   static final GoRouter router = GoRouter(
-    initialLocation: '/',
+    // Rota inicial da aplicação
+    initialLocation: '/main',
     routes: <RouteBase>[
       // Rotas de nível superior
       GoRoute(
@@ -55,8 +57,13 @@ class AppRoutes {
           return TransactionsPage(initialType: type);
         },
       ),
+      GoRoute(
+        path: '/wallets',
+        name: 'wallets-list',
+        builder: (context, state) => const WalletListPage(),
+      ),
 
-      // ✅ ROTA ANINHADA PARA METAS (GOALS)
+      // ✅ ROTA ANINHADA PARA METAS (GOALS) - AGORA DENTRO DA LISTA
       GoRoute(
         path: '/goals',
         name: 'goals-list',
@@ -80,13 +87,18 @@ class AppRoutes {
             path: 'edit/:id', // Caminho relativo: /goals/edit/:id
             name: 'edit-goal',
             builder: (context, state) {
-              final goalToEdit = state.extra as Goal;
-              return EditGoalScreen(initialGoal: goalToEdit);
+              // It's safer to check if 'extra' is not null and is of the correct type
+              if (state.extra is Goal) {
+                final goalToEdit = state.extra as Goal;
+                return EditGoalScreen(initialGoal: goalToEdit);
+              }
+              // Return an error screen or navigate back if the extra is not valid
+              return const Text('Error: Goal data not provided correctly.');
             },
           ),
         ],
       ),
-    ],
+    ], // <-- BRACKET MOVED HERE
     errorBuilder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('Página não encontrada')),
       body: Center(

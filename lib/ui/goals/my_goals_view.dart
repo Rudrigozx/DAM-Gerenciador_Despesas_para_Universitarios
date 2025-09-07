@@ -27,6 +27,7 @@ class MyGoalsView extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'my_goals_fab',
         onPressed: () async {
           await context.push('/goals/new');
     
@@ -41,7 +42,7 @@ class MyGoalsView extends StatelessWidget {
   }
 
   Widget _buildCategoryFilters(BuildContext context, MyGoalsViewModel viewModel) {
-    const categories = ['Todas', 'Viagens', 'Estudos', 'Veículo'];
+    const categories = ['Todas', 'Viagem', 'Estudos', 'Veículo'];
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: SizedBox(

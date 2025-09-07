@@ -23,7 +23,7 @@ void main() async {
           create: (_) => MainNavigationViewModel(),
         ),
         ChangeNotifierProvider(
-          create: (_) => MyGoalsViewModel(SqlGoalRepositoryImpl()),
+          create: (_) => MyGoalsViewModel(SqlGoalRepositoryImpl())..fetchGoals(),
         ),
       ],
       child: const MyApp(),

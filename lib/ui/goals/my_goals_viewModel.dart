@@ -44,4 +44,37 @@ class MyGoalsViewModel extends ChangeNotifier {
     _selectedCategory = category;
     notifyListeners();
   }
+
+  Future<Goal?> getGoalById(int id) async {
+    // Idealmente, o repositório teria um método getById.
+    // Por enquanto, vamos buscar todas e filtrar.
+    final allGoals = await _repository.getGoals();
+    return allGoals.firstWhere((g) => g.id == id);
+  }
+
+  Future<void> addValueToGoal(Goal goal, double amountToAdd) async {
+    final newAmount = goal.currentAmount + amountToAdd;
+    
+    // Cria uma cópia da meta com o valor atualizado
+    final updatedGoal = goal.copyWith(
+      currentAmount: newAmount > goal.targetAmount ? goal.targetAmount : newAmount,
+    );
+
+    await _repository.updateGoal(updatedGoal);
+    await fetchGoals();
+  }
+
+  Future<void> deleteGoal(int id) async {
+    await _repository.deleteGoal(id);
+    // Recarrega a lista principal após deletar
+    await fetchGoals();
+  }
+
+  Future<void> updateGoal(Goal goal) async {
+    await _repository.updateGoal(goal);
+    // Recarrega tudo para garantir que todas as telas fiquem sincronizadas
+    await fetchGoals();
+  }
+
+  
 }

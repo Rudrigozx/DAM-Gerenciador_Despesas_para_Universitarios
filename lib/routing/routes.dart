@@ -1,98 +1,92 @@
-
-
-
 import 'package:fin_plus/Models/transaction_data.dart';
+import 'package:fin_plus/domain/models/goal_model.dart';
 import 'package:fin_plus/ui/CadastroView.dart';
 import 'package:fin_plus/ui/core/main_navigation_view.dart';
 import 'package:fin_plus/ui/expenses_list/ExpensesListPage.dart';
+import 'package:fin_plus/ui/goals/edit_goal_screen.dart';
+import 'package:fin_plus/ui/goals/goal_details_screen.dart';
 import 'package:fin_plus/ui/goals/my_goals_view.dart';
 import 'package:fin_plus/ui/goals/new_goal_view.dart';
 import 'package:fin_plus/ui/home/HomePage.dart';
 import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
 import '../ui/categories/category_list_page.dart';
 
 class AppRoutes {
-  // Instância do GoRouter para ser usada no MaterialApp.router
   static final GoRouter router = GoRouter(
-    // Rota inicial da aplicação
     initialLocation: '/',
-
-    // Lista de todas as rotas da nossa aplicação
     routes: <RouteBase>[
-      // Rota para a tela de Cadastro/Login (tela inicial)
+      // Rotas de nível superior
       GoRoute(
         path: '/',
         name: 'signup',
-        builder: (BuildContext context, GoRouterState state) {
-          return const CriarConta(); // Sugestão de novo nome de classe
-        },
+        builder: (context, state) => const CriarConta(),
       ),
-
-      // Rota para a tela principal que contém a Bottom Navigation
       GoRoute(
         path: '/main',
         name: 'main',
-        builder: (BuildContext context, GoRouterState state) {
-          return const MainNavigationView();
-        },
+        builder: (context, state) => const MainNavigationView(),
       ),
-
-      // Rota para a HomePage (provavelmente uma das telas dentro do Navigator)
       GoRoute(
         path: '/home',
         name: 'home',
-        builder: (BuildContext context, GoRouterState state) {
-          return const HomePage(); 
-        },
+        builder: (context, state) => const HomePage(),
       ),
-
-      // Tela de listagem de despesas
       GoRoute(
         path: '/expenses',
         name: 'expenses-list',
-        builder: (context, state) => const ExpensesListPage(), 
+        builder: (context, state) => const ExpensesListPage(),
       ),
-
       GoRoute(
         path: '/categories',
         name: 'categories-list',
         builder: (context, state) => const CategoryListPage(),
       ),
-
-       GoRoute(
-        path: '/goals',
-        name: 'goals-list',
-        builder: (context, state) => const MyGoalsView(),
-      ),
-
-      // ✅ ROTA ADICIONADA: Tela de criação de nova meta
       GoRoute(
-        path: '/goals/new',
-        name: 'new-goal',
-        builder: (context, state) => const NewGoalView(),
-      ),
-
-
-      // Rotas agrupadas para criação de transações
-      GoRoute(
-        path: '/transaction/:type/new', // Rota com parâmetro dinâmico
+        path: '/transaction/:type/new',
         name: 'new-transaction',
-        builder: (BuildContext context, GoRouterState state) {
-          // Obtém o tipo da URL e o converte para o enum
+        builder: (context, state) {
           final typeString = state.pathParameters['type']!;
           final type = TransactionType.values.firstWhere(
-            (e) => e.name == typeString,
-            orElse: () => TransactionType.expense, // Valor padrão em caso de erro
+                (e) => e.name == typeString,
+            orElse: () => TransactionType.expense,
           );
           return TransactionsPage(initialType: type);
         },
       ),
-    ],
 
-    // Página de erro para rotas não encontradas
+      // ✅ ROTA ANINHADA PARA METAS (GOALS)
+      GoRoute(
+        path: '/goals',
+        name: 'goals-list',
+        builder: (context, state) => const MyGoalsView(),
+        // Sub-rotas relacionadas a 'goals'
+        routes: [
+          GoRoute(
+            path: 'new', // Caminho relativo: será /goals/new
+            name: 'new-goal',
+            builder: (context, state) => const NewGoalView(),
+          ),
+          GoRoute(
+            path: 'details/:id', // Caminho relativo: /goals/details/:id
+            name: 'goal-details',
+            builder: (context, state) {
+              final goalId = int.parse(state.pathParameters['id']!);
+              return GoalDetailsScreen(goalId: goalId);
+            },
+          ),
+          GoRoute(
+            path: 'edit/:id', // Caminho relativo: /goals/edit/:id
+            name: 'edit-goal',
+            builder: (context, state) {
+              final goalToEdit = state.extra as Goal;
+              return EditGoalScreen(initialGoal: goalToEdit);
+            },
+          ),
+        ],
+      ),
+    ],
     errorBuilder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('Página não encontrada')),
       body: Center(

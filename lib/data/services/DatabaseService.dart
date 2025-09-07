@@ -57,5 +57,15 @@ class DatabaseService {
         colorValue INTEGER NOT NULL
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE wallets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        initialBalance REAL NOT NULL,
+        iconCodePoint INTEGER NOT NULL,
+        colorValue INTEGER NOT NULL
+      )
+    ''');
   }
 }

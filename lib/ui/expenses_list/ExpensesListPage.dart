@@ -1,14 +1,15 @@
-
-import 'package:fin_plus/ui/expenses_list/ExpensesListViewModel.dart';
-import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../../../Models/transaction_data.dart';
+
+import '../../Models/transaction_data.dart';
 import '../../data/repositories/TransactionRepository.dart';
+import '../transactions/TransactionsPage.dart';
 
 class ExpensesListPage extends StatefulWidget {
-  const ExpensesListPage({super.key});
+  final String? walletName; // Recebe o nome da carteira para filtrar
+
+  const ExpensesListPage({super.key, this.walletName});
 
   @override
   State<ExpensesListPage> createState() => _ExpensesListPageState();
@@ -16,7 +17,6 @@ class ExpensesListPage extends StatefulWidget {
 
 class _ExpensesListPageState extends State<ExpensesListPage> {
   final TransactionRepository _repository = TransactionRepository();
-
   bool _isLoading = true;
   DateTime _selectedMonth = DateTime.now();
   List<Transaction> _transactions = [];
@@ -139,9 +139,15 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Mensagem customizada para quando a lista estiver vazia
+    final emptyListMessage = widget.walletName != null
+        ? 'Nenhuma transação para a carteira "${widget.walletName}" neste mês.'
+        : 'Nenhuma transação encontrada para este mês.';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Despesas'),
+        // Título customizado para quando estiver filtrando
+        title: Text(widget.walletName ?? 'Minhas Transações'),
         centerTitle: true,
       ),
       body: Column(
@@ -164,6 +170,13 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
+                : _transactions.isEmpty
+                ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(emptyListMessage, textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+              ),
+            )
                 : _buildTransactionList(),
           ),
         ],
@@ -176,7 +189,6 @@ class _ExpensesListPageState extends State<ExpensesListPage> {
           ).then((_) {
              fetchTransactions();
           });
-          //fetchTransactions();
         },
         child: const Icon(Icons.add),
       ),

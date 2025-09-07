@@ -1,17 +1,34 @@
+import 'package:fin_plus/data/repositories/sql_goal_repository_impl.dart';
+import 'package:fin_plus/ui/core/main_navigation_viewmodel.dart';
+import 'package:fin_plus/ui/goals/my_goals_viewModel.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'data/services/DatabaseService.dart';
 import 'ui/core/themes/Theme.dart';
 import 'routing/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // 1. Importe o Provider
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // É preciso iniciar o BD e a formatação de data no inicio do APP
   await DatabaseService().database;
   await initializeDateFormatting('pt_BR', null);
 
-  runApp(const MyApp());
+  // 2. Envolva o MyApp com o MultiProvider
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => MainNavigationViewModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => MyGoalsViewModel(SqlGoalRepositoryImpl()),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

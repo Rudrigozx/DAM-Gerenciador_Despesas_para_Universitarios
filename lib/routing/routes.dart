@@ -5,6 +5,8 @@ import 'package:fin_plus/Models/transaction_data.dart';
 import 'package:fin_plus/ui/CadastroView.dart';
 import 'package:fin_plus/ui/core/main_navigation_view.dart';
 import 'package:fin_plus/ui/expenses_list/ExpensesListPage.dart';
+import 'package:fin_plus/ui/goals/my_goals_view.dart';
+import 'package:fin_plus/ui/goals/new_goal_view.dart';
 import 'package:fin_plus/ui/home/HomePage.dart';
 import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
 import 'package:flutter/material.dart';
@@ -59,6 +61,20 @@ class AppRoutes {
         name: 'categories-list',
         builder: (context, state) => const CategoryListPage(),
       ),
+
+       GoRoute(
+        path: '/goals',
+        name: 'goals-list',
+        builder: (context, state) => const MyGoalsView(),
+      ),
+
+      // ✅ ROTA ADICIONADA: Tela de criação de nova meta
+      GoRoute(
+        path: '/goals/new',
+        name: 'new-goal',
+        builder: (context, state) => const NewGoalView(),
+      ),
+
 
       // Rotas agrupadas para criação de transações
       GoRoute(

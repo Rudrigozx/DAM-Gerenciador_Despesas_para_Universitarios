@@ -1,5 +1,4 @@
 
-import 'package:fin_plus/ui/expenses_list/ExpensesListViewModel.dart';
 import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';

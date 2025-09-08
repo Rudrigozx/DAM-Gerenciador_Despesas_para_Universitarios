@@ -45,7 +45,7 @@ class NotificationService {
         details,
       );
 
-      // Salva no banco via ViewModel
+      // Salva no banco
       if (_notificationViewModel != null) {
         final n = AppNotification(
           title: title,

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-
-import '../../../../data/services/NotificationService.dart';
+import '/data/services/NotificationService.dart';
 import '/data/services/UsuarioService.dart';
 import '/Models/Usuario.dart';
 
@@ -11,7 +10,6 @@ class UsuarioViewModel extends ChangeNotifier {
   Usuario? get usuario => _usuario;
 
   final UsuarioService _usuarioService = UsuarioService();
-
 
   String? validarEmail (value){
     if (value == null || value.isEmpty) {
@@ -38,7 +36,7 @@ class UsuarioViewModel extends ChangeNotifier {
       return 'O campo nome é obrigatório';
     }
     if (value.length < 16) {
-      return 'A nome deve ter pelo menos 16 caracteres';
+      return 'O nome deve ter pelo menos 16 caracteres';
     }
     return null;
   }
@@ -53,39 +51,50 @@ class UsuarioViewModel extends ChangeNotifier {
     return null;
   }
 
-  String? cadastrar(String nome,String idade, String email, String senha, int id) {
+  Future<String?> cadastrar(String nome, String idade, String email, String senha) async {
     try {
-      Usuario novoUsuario = Usuario(nome, idade, email, senha, id);
-      _usuarioService.cadastrarUsuario(novoUsuario);
+      // O ID será gerado pelo banco de dados, então não é necessário passá-lo aqui
+      Usuario novoUsuario = Usuario.comIdade(nome, idade, email, senha);
+      await _usuarioService.cadastrarUsuario(novoUsuario);
       notifyListeners();
 
       NotificationService.showNotification(
         title: 'Cadastro realizado',
-        body: 'Usuário ${nome} foi cadastrado com sucesso!',
+        body: 'Usuário $nome foi cadastrado com sucesso!',
         type: "alerta",
       );
 
-      notifyListeners();
+      return null;
     } catch (e) {
       if (kDebugMode) {
         print("Erro ao cadastrar usuário: $e");
         return e.toString();
       }
-      return toString();
+      return 'Erro desconhecido ao cadastrar usuário.';
     }
   }
 
+  /* void logar(String email){
+    bool emailExistente =
+    _usuarios.any((u) => u.email.toLowerCase() == usuario.email.toLowerCase());
 
-  List<Usuario> listarUsuarios() {
+    if (emailExistente) {
+      throw Exception("Já existe um usuário com esse e-mail.");
+    }
+  }*/
+
+  // Atualize o método para buscar a lista do banco de dados
+  Future<List<Usuario>> listarUsuarios() async {
     return _usuarioService.listarUsuarios();
   }
 
-  Usuario? buscarPorEmail(String email) {
+  // Atualize o método para buscar no banco de dados
+  Future<Usuario?> buscarPorEmail(String email) async {
     return _usuarioService.buscarPorEmail(email);
   }
 
-
-  Usuario? buscarPorId(int id) {
+  // Atualize o método para buscar no banco de dados
+  Future<Usuario?> buscarPorId(int id) async {
     return _usuarioService.buscarPorId(id);
   }
 

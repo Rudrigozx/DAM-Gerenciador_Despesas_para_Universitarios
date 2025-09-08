@@ -9,33 +9,29 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'data/services/NotificationService.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // É preciso iniciar o BD e a formatação de data no inicio do APP
   await DatabaseService().database;
   await initializeDateFormatting('pt_BR', null);
   await NotificationService.init();
   await Permission.notification.request();
 
-  Future.delayed(const Duration(seconds: 2), () {
-    NotificationService.showNotification(
-      title: "Teste interno",
-      body: "Essa notificação deve aparecer na View também!",
-      type: "alerta",
-    );
-  });
 
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (_) {
-        final vm = NotificationViewModel();
-        NotificationService.registerViewModel(vm); // conecta o Service
-        return vm;
-      }),
-    ],
-    child: const MyApp(),
-  ),
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) {
+          final vm = NotificationViewModel();
+          NotificationService.registerViewModel(vm);
+          return vm;
+        }),
+        ChangeNotifierProvider(
+          create: (_) => UsuarioViewModel(),
+        ),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
@@ -44,22 +40,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(
-            create: (context) => UsuarioViewModel(),
-            child: MaterialApp(
-            title: 'Fin Plus',
-            theme: ThemeData(
-            primarySwatch: Colors.blue,
-            ),
-            ),
-            )
-    ],
-            child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: HomePage(),
-    )
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Fin Plus',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: HomePage(),
     );
   }
 }

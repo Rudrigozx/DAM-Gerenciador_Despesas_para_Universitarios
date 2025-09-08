@@ -1,5 +1,6 @@
 import 'package:fin_plus/data/repositories/sql_goal_repository_impl.dart';
 import 'package:fin_plus/ui/core/main_navigation_viewmodel.dart';
+import 'package:fin_plus/ui/dashboard/dashboard_viewmodel.dart';
 import 'package:fin_plus/ui/goals/my_goals_viewModel.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'data/services/DatabaseService.dart';
@@ -25,6 +26,7 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => MyGoalsViewModel(SqlGoalRepositoryImpl())..fetchGoals(),
         ),
+        ChangeNotifierProvider(create: (_) => DashboardViewModel()),
       ],
       child: const MyApp(),
     ),

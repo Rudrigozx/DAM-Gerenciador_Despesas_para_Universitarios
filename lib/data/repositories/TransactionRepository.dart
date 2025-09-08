@@ -29,9 +29,49 @@ class TransactionRepository {
     await db.delete('transactions', where: 'id = ?', whereArgs: [id]);
   }
 
-  // BUSCAR transações de um mês e ano específicos
+   // Calcula o saldo total (Receitas - Despesas)
+  Future<double> getTotalBalance() async {
+    final db = await dbService.database;
+    final totalIncome = await db.rawQuery(
+        "SELECT SUM(amount) as total FROM transactions WHERE type = ?",
+        [TransactionType.income.index]);
+    final totalExpense = await db.rawQuery(
+        "SELECT SUM(amount) as total FROM transactions WHERE type = ?",
+        [TransactionType.expense.index]);
+
+    final income = (totalIncome.first['total'] as num?)?.toDouble() ?? 0.0;
+    final expense = (totalExpense.first['total'] as num?)?.toDouble() ?? 0.0;
+
+    return income - expense;
+  }
+
+  Future<double> getExpensesForMonth(DateTime month) async {
+    final db = await dbService.database;
+    final firstDay = DateTime(month.year, month.month, 1).toIso8601String();
+    final lastDay = DateTime(month.year, month.month + 1, 0).toIso8601String();
+
+    final result = await db.rawQuery(
+        "SELECT SUM(amount) as total FROM transactions WHERE type = ? AND date BETWEEN ? AND ?",
+        [TransactionType.expense.index, firstDay, lastDay]);
+    
+    return (result.first['total'] as num?)?.toDouble() ?? 0.0;
+  }
+
+  Future<Map<String, double>> getExpensesByCategoryForMonth(DateTime month) async {
+    final db = await dbService.database;
+    final firstDay = DateTime(month.year, month.month, 1).toIso8601String();
+    final lastDay = DateTime(month.year, month.month + 1, 0).toIso8601String();
+
+    final result = await db.rawQuery(
+      "SELECT category, SUM(amount) as total FROM transactions WHERE type = ? AND date BETWEEN ? AND ? GROUP BY category",
+      [TransactionType.expense.index, firstDay, lastDay]);
+
+    return { for (var row in result) row['category'] as String : (row['total'] as num).toDouble() };
+  }
+
   Future<List<Transaction>> getTransactionsByMonth(DateTime date) async {
     final db = await dbService.database;
+    
     // Formata o início e o fim do mês para a consulta SQL
     final firstDayOfMonth = DateTime(date.year, date.month, 1).toIso8601String();
     final lastDayOfMonth = DateTime(date.year, date.month + 1, 0, 23, 59, 59).toIso8601String();
@@ -43,6 +83,7 @@ class TransactionRepository {
       orderBy: 'date DESC', // Ordena pela data mais recente primeiro
     );
 
+    // Converte a lista de Maps em uma lista de objetos Transaction
     return List.generate(maps.length, (i) => Transaction.fromMap(maps[i]));
   }
 
@@ -96,7 +137,6 @@ class TransactionRepository {
     for (var map in transferOutMaps) {
       balance -= (map['amount'] as double);
     }
-
     return balance;
   }
 }

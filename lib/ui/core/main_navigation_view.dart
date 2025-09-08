@@ -50,6 +50,10 @@ class MainNavigationView extends StatelessWidget {
                   icon: Icon(Icons.account_balance_wallet),
                   label: 'Carteira',
                 ),
+                BottomNavigationBarItem(
+                icon: Icon(Icons.person), // Novo item para o perfil do usuário
+                label: 'Perfil',
+                ),
               ],
             ),
           );

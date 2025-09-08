@@ -1,15 +1,13 @@
+import 'package:fin_plus/ui/notifications/notification_view.dart';
+import 'package:fin_plus/ui/notifications/notification_view_model.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:fin_plus/ui/core/ui/Login/UsuarioView.dart';
-import 'package:fin_plus/ui/core/ui/Login/UsuarioViewModel.dart';
+import 'package:fin_plus/ui/Login/UsuarioViewModel.dart';
 import 'package:fin_plus/ui/home/HomePage.dart';
-import 'package:intl/date_symbol_data_file.dart' hide initializeDateFormatting;
 import 'package:provider/provider.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
 import 'data/services/DatabaseService.dart';
-import 'ui/core/themes/Theme.dart';
-import 'routing/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'data/services/NotificationService.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,8 +15,28 @@ void main() async{
   // É preciso iniciar o BD e a formatação de data no inicio do APP
   await DatabaseService().database;
   await initializeDateFormatting('pt_BR', null);
+  await NotificationService.init();
+  await Permission.notification.request();
 
-  runApp(const MyApp());
+  Future.delayed(const Duration(seconds: 2), () {
+    NotificationService.showNotification(
+      title: "Teste interno",
+      body: "Essa notificação deve aparecer na View também!",
+      type: "alerta",
+    );
+  });
+
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) {
+        final vm = NotificationViewModel();
+        NotificationService.registerViewModel(vm); // conecta o Service
+        return vm;
+      }),
+    ],
+    child: const MyApp(),
+  ),
+  );
 }
 
 class MyApp extends StatelessWidget {

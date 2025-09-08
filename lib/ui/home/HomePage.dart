@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../core/ui/Login/CadastroView.dart';
+import '../Login/CadastroView.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -29,22 +29,27 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // Página 1
                 Container(
-                  color: Colors.green.withOpacity(0.9),
+                  color: Colors.yellow.withOpacity(0.8),
                   child:  Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Image.asset(
-                          'assets/logos/m17.png',
-                          height: 300,
+                          'assets/logos/Logo_fin.png',
+                          height: 250,
                           fit: BoxFit.contain,
                         ),
                         Text(
-                          'Página 1',
-                          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                          'Seja Bem-vindo ao Fin+!',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
                         ),
-                        SizedBox(height: 12),
-                        Text('Deslize →'),
+                        SizedBox(height: 5),
+                        Text("O app financeiro perfeito para universitários"),
+                        SizedBox(height: 15),
+                        Text('Deslize →',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                        )
+
                       ],
                     ),
                   ),
@@ -52,7 +57,7 @@ class _HomePageState extends State<HomePage> {
 
                 // Página 2
                 Container(
-                  color: Colors.green.withOpacity(0.9),
+                  color: Colors.yellow.withOpacity(0.8),
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -63,11 +68,11 @@ class _HomePageState extends State<HomePage> {
                           fit: BoxFit.contain,
                         ),
                         Text(
-                          'Página 2',
-                          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                          'Tenha controle sobre sua vida financeira',
+                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
                         ),
                         SizedBox(height: 12),
-                        Text('Carrossel horizontal aqui'),
+
                       ],
                     ),
                   ),
@@ -75,7 +80,7 @@ class _HomePageState extends State<HomePage> {
 
                 // Página 3 (com botão)
                 Container(
-                  color: Colors.green.withOpacity(0.9),
+                  color: Colors.yellow.withOpacity(0.8),
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -85,13 +90,13 @@ class _HomePageState extends State<HomePage> {
                           height: 200,
                           fit: BoxFit.contain,
                         ),
+                        SizedBox(height: 10),
                         const Text(
-                          'Página 3',
-                          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                          'Enquanto mantém o rítmo dos estudos',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 12),
-                        const Text('Fim do exemplo'),
-                        SizedBox(height: 32),
+
+                        SizedBox(height: 22),
 
                         // 🔹 Botão apenas na terceira página
                         ElevatedButton(

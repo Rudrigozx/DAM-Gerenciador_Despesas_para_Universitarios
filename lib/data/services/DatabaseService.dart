@@ -50,11 +50,32 @@ class DatabaseService {
     ''');
 
     await db.execute('''
+      CREATE TABLE users (
+        id INTEGER PRIMARY PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        idade TEXT NOT NULL,
+        email TEXT NOT NULL,
+        senha TEXT NOT NULL
+      )
+    ''');
+
+
+    await db.execute('''
       CREATE TABLE categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         iconCodePoint INTEGER NOT NULL,
         colorValue INTEGER NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE notifications (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT,
+          body TEXT,
+          type TEXT,
+          date TEXT
       )
     ''');
   }

@@ -8,7 +8,6 @@ class Usuario {
 
   Usuario(this._nome, this._idade, this._email, this._senha, this._id);
 
-
   String get nome => _nome;
   set nome(String valor) {
     if (valor.isNotEmpty) {
@@ -57,4 +56,25 @@ class Usuario {
     }*/
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'id': _id,
+      'nome': _nome,
+      'idade': _idade,
+      'email': _email,
+      'senha': _senha,
+    };
+  }
+
+  // Método de fábrica para criar um objeto Usuario a partir de um Map
+  factory Usuario.fromMap(Map<String, dynamic> map) {
+    return Usuario(
+      map['nome'],
+      map['idade'],
+      map['email'],
+      map['senha'],
+      map['id'],
+    );
+  }
 }
+

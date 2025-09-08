@@ -1,13 +1,9 @@
-
-
-
 import 'package:fin_plus/Models/transaction_data.dart';
-import 'package:fin_plus/ui/CadastroView.dart';
 import 'package:fin_plus/ui/core/main_navigation_view.dart';
 import 'package:fin_plus/ui/expenses_list/ExpensesListPage.dart';
 import 'package:fin_plus/ui/home/HomePage.dart';
 import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
-import '../ui/core/ui/Login/CadastroView.dart';
+import '../ui/Login/CadastroView.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '/ui/home/HomePage.dart';

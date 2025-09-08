@@ -1,4 +1,5 @@
 import 'package:fin_plus/data/repositories/TransactionRepository.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 enum ViewState { idle, loading, success, error }
@@ -15,8 +16,12 @@ class DashboardViewModel extends ChangeNotifier {
   double _monthlyExpenses = 0.0;
   double get monthlyExpenses => _monthlyExpenses;
 
-  Map<String, double> _categoryExpenses = {};
-  Map<String, double> get categoryExpenses => _categoryExpenses;
+  List<FlSpot> _balanceEvolution = [];
+  List<FlSpot> get balanceEvolution => _balanceEvolution;
+
+  // Propriedade para guardar as datas do eixo X
+  List<DateTime> _balanceEvolutionDates = [];
+  List<DateTime> get balanceEvolutionDates => _balanceEvolutionDates;
 
   // Método principal para carregar todos os dados do dashboard
   Future<void> fetchDashboardData() async {
@@ -29,18 +34,30 @@ class DashboardViewModel extends ChangeNotifier {
       final results = await Future.wait([
         _repository.getTotalBalance(),
         _repository.getExpensesForMonth(now),
-        _repository.getExpensesByCategoryForMonth(now),
+        _repository.getBalanceEvolution(days: 8),
       ]);
 
       _totalBalance = results[0] as double;
       _monthlyExpenses = results[1] as double;
-      _categoryExpenses = results[2] as Map<String, double>;
+
+      // Processa os dados para o gráfico
+      final evolutionData = results[2] as List<Map<String, dynamic>>;
+
+      // Preenche a nova lista de datas
+      _balanceEvolutionDates = evolutionData.map((d) => d['date'] as DateTime).toList();
+
+      _balanceEvolution = evolutionData.asMap().entries.map((entry) {
+        final index = entry.key.toDouble(); // Eixo X (0, 1, 2, 3...)
+        final balance = entry.value['balance'] as double; // Eixo Y (saldo)
+        return FlSpot(index, balance);
+      }).toList();
 
       _state = ViewState.success;
     } catch (e) {
       print("Erro ao buscar dados do dashboard: $e");
       _state = ViewState.error;
     }
+    // Notifica novamente com os dados carregados ou com o estado de erro
     notifyListeners();
   }
 }

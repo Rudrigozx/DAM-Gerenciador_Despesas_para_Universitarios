@@ -40,8 +40,8 @@ dependencies:
   intl: ^0.20.2
   sqflite: ^2.4.2
   path: ^1.9.1
-  fl_chart: ^1.1.0
-  vector_math: 2.1.4
+  fl_chart: ^0.68.0  # Uma versão bem mais recente e estável do fl_chart
+  vector_math: ^2.1.4 # Força o uso de uma versão compatível do vector_math
 
 
 dev_dependencies:

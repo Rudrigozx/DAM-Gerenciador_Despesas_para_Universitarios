@@ -45,6 +45,36 @@ class TransactionRepository {
     return income - expense;
   }
 
+  Future<List<Map<String, dynamic>>> getBalanceEvolution({int days = 7}) async {
+    final db = await dbService.database;
+    final List<Map<String, dynamic>> dailyBalances = [];
+    final today = DateTime.now();
+
+    for (int i = 0; i < days; i++) {
+      final date = today.subtract(Duration(days: i));
+      final dateString = date.toIso8601String();
+
+      // Calcula o saldo total (receitas - despesas) até o final daquele dia específico
+      final result = await db.rawQuery('''
+        SELECT SUM(
+          CASE
+            WHEN type = ${TransactionType.income.index} THEN amount
+            WHEN type = ${TransactionType.expense.index} THEN -amount
+            ELSE 0
+          END
+        ) as totalBalance
+        FROM transactions
+        WHERE date <= ?
+      ''', [dateString]);
+      
+      final balance = (result.first['totalBalance'] as num?)?.toDouble() ?? 0.0;
+      dailyBalances.add({'date': date, 'balance': balance});
+    }
+
+    // A lista estará do dia mais recente para o mais antigo, então invertemos
+    return dailyBalances.reversed.toList();
+  }
+
   Future<double> getExpensesForMonth(DateTime month) async {
     final db = await dbService.database;
     final firstDay = DateTime(month.year, month.month, 1).toIso8601String();

@@ -1,5 +1,4 @@
-//TransactionsViewModel.dart
-
+import 'package:fin_plus/ui/dashboard/dashboard_viewmodel.dart';
 import 'package:flutter/material.dart';
 import '../../../Models/transaction_data.dart';
 import '../../data/repositories/TransactionRepository.dart';
@@ -14,23 +13,25 @@ class TransactionViewModel extends ChangeNotifier {
   final TransactionRepository _repository = TransactionRepository();
   final TransactionType initialType;
   final VoidCallback? onSaveSuccess;
+  final DashboardViewModel _dashboardViewModel; // Dependência do Dashboard
 
   TransactionViewModel({
     required this.initialType,
+    required DashboardViewModel dashboardViewModel, // Requerido no construtor
     this.onSaveSuccess,
-  }) {
+  }) : _dashboardViewModel = dashboardViewModel {
     _currentType = initialType;
   }
+
+  
 
   //-------------------------------------------------
   // ESTADO DA UI (UI STATE)
   //-------------------------------------------------
 
-  // Controllers para campos de texto
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController amountController = TextEditingController();
 
-  // Estado interno da ViewModel
   late TransactionType _currentType;
   DateTime _selectedDate = DateTime.now();
   String? _selectedCategory;
@@ -57,7 +58,6 @@ class TransactionViewModel extends ChangeNotifier {
 
   void changeTransactionType(TransactionType newType) {
     _currentType = newType;
-    // Limpa os campos que podem mudar para evitar inconsistências
     _selectedSourceAccount = null;
     _selectedDestinationAccount = null;
     notifyListeners();
@@ -96,7 +96,6 @@ class TransactionViewModel extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    // Validação dos dados de entrada
     final amount = double.tryParse(amountController.text.replaceAll(',', '.')) ?? 0.0;
     if (descriptionController.text.isEmpty || amount <= 0 || _selectedCategory == null) {
       print("Erro de validação: Campos obrigatórios não preenchidos.");
@@ -106,7 +105,6 @@ class TransactionViewModel extends ChangeNotifier {
       return;
     }
 
-    // Cria o objeto do modelo com os dados do estado atual
     final newTransaction = Transaction(
       description: descriptionController.text,
       amount: amount,
@@ -115,15 +113,16 @@ class TransactionViewModel extends ChangeNotifier {
       date: _selectedDate,
       sourceAccount: _selectedSourceAccount,
       destinationAccount: _selectedDestinationAccount,
-      // TODO: Adicionar a lógica de repetição ao modelo se necessário
     );
 
-    // Chama o repositório para salvar os dados no SQLite
     try {
       await _repository.addTransaction(newTransaction);
       print('Transação salva com sucesso!');
 
-      // Chama o callback para notificar a View que a operação foi bem-sucedida (para navegação)
+      // ✅ ATUALIZAÇÃO PRINCIPAL AQUI:
+      // Avisa o DashboardViewModel para recarregar seus dados.
+      await _dashboardViewModel.fetchDashboardData();
+
       onSaveSuccess?.call();
 
     } catch (e) {
@@ -134,7 +133,6 @@ class TransactionViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-
 
   //-------------------------------------------------
   // LIMPEZA (CLEANUP)

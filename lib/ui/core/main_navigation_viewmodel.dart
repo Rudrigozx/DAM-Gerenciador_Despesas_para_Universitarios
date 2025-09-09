@@ -1,8 +1,8 @@
 // lib/ui/core/main_navigation_viewmodel.dart
+import 'package:fin_plus/ui/dashboard/dashboard_screen.dart';
 import 'package:fin_plus/ui/expenses_list/ExpensesListPage.dart';
 import 'package:fin_plus/ui/goals/my_goals_view.dart';
 import 'package:flutter/material.dart';
-import '../placeholders/home_placeholder_view.dart';
 import '../wallets/wallet_list_page.dart';
 
 
@@ -12,7 +12,7 @@ class MainNavigationViewModel extends ChangeNotifier {
 
   // Lista das telas que serão exibidas em cada aba.
   final List<Widget> screens = [
-    const HomePlaceholderView(),
+    const DashboardScreen(),
     const MyGoalsView(),
     const ExpensesListPage(),
     const WalletListPage(),

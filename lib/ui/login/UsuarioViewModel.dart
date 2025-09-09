@@ -74,17 +74,32 @@ class UsuarioViewModel extends ChangeNotifier {
     }
   }
 
-  // Atualize o método para buscar a lista do repositório
   Future<List<Usuario>> listarUsuarios() async {
     return _usuarioRepository.listarUsuarios();
   }
 
-  // Atualize o método para buscar no repositório
   Future<Usuario?> buscarPorEmail(String email) async {
     return _usuarioRepository.buscarPorEmail(email);
   }
 
-  // Atualize o método para buscar no repositório
+  //Buscar login dos usuarios
+  Future<String?> login(String email, String senha) async {
+    final usuario = await _usuarioRepository.buscarPorEmail(email);
+
+    if (usuario == null) {
+      return 'E-mail não encontrado.';
+    }
+
+    if (usuario.senha != senha) {
+      return 'Senha incorreta.';
+    }
+
+    _usuario = usuario;
+    notifyListeners();
+    return null;
+  }
+
+
   Future<Usuario?> buscarPorId(int id) async {
     return _usuarioRepository.buscarPorId(id);
   }

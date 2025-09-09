@@ -32,13 +32,14 @@ class CadastroView extends State<CriarConta> {
         appBar: AppBar(title: const Text('')),
         body: Padding(
           padding: const EdgeInsets.all(16),
-          child: Form( // <-- Form aqui
+          child: Form(
             key: formKey,
             child: Column(
               children: [
+                const SizedBox(height: 15),
                 Image.asset(
                   'assets/logos/Logo_fin.png',
-                  height: 170,
+                  height: 50,
                   alignment: Alignment.center,
                 ),
                 const SizedBox(height: 15),
@@ -74,6 +75,8 @@ class CadastroView extends State<CriarConta> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 12),
+
 
                 TextFormField(
                   controller: _emailController,

@@ -22,56 +22,6 @@ class NotificationService {
     await _notificationsPlugin.initialize(settings);
   }
 
-    static Future<void> showNotification({
-      required String title,
-      required String body,
-      String type = "default",
-    }) async {
-      // Mostra notificação no sistema
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'transaction_channel',
-        'Transaction Notifications',
-        channelDescription: 'Notificações do app',
-        importance: Importance.max,
-        priority: Priority.high,
-      );
-
-      const NotificationDetails details = NotificationDetails(android: androidDetails);
-
-      await _notificationsPlugin.show(
-        DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        title,
-        body,
-        details,
-      );
-
-      // Salva no banco
-      if (_notificationViewModel != null) {
-        final n = AppNotification(
-          title: title,
-          body: body,
-          type: type,
-          date: DateTime.now(),
-        );
-        await _notificationViewModel!.addNotification(n);
-      }
-    }
-
-
-    // permissão direto pelo plugin
-    /*
-    final androidPlugin = _notificationsPlugin
-        .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    await androidPlugin?.requestPermission();
-
-    // iOS/macOS
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(alert: true, badge: true, sound: true);
-  }
-
   static Future<void> showNotification({
     required String title,
     required String body,
@@ -88,7 +38,7 @@ class NotificationService {
 
     const NotificationDetails details = NotificationDetails(android: androidDetails);
 
-    // Exibe a notificação
+    // Exibe a notificação no sistema
     await _notificationsPlugin.show(
       DateTime.now().millisecondsSinceEpoch ~/ 1000,
       title,
@@ -96,18 +46,23 @@ class NotificationService {
       details,
     );
 
-    //  Salva no histórico (View)
-    _notificationViewModel?.addNotification(
-      AppNotification(
-        title: title,
-        body: body,
-        type: type,
-        date: DateTime.now(),
-      ),
+    // Cria e salva a notificação no banco de dados local
+    final newNotification = AppNotification(
+      title: title,
+      body: body,
+      type: type,
+      date: DateTime.now(),
     );
-    */
+    await saveNotification(newNotification);
+  }
 
-
-
-
+  /// Salva uma notificação no banco de dados usando o ViewModel registrado.
+  static Future<void> saveNotification(AppNotification notification) async {
+    if (_notificationViewModel != null) {
+      await _notificationViewModel!.addNotification(notification);
+    } else {
+      // ✅ Trata o caso onde o ViewModel não está registrado
+      print("Erro: ViewModel de notificação não foi registrado.");
+    }
+  }
 }

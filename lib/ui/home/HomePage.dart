@@ -39,15 +39,17 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         Image.asset(
                           'assets/logos/Logo_fin.png',
-                          height: 250,
+                          height: 100,
                           fit: BoxFit.contain,
                         ),
+                        SizedBox(height: 5),
                         Text(
                           'Seja Bem-vindo ao Fin+!',
                           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
                         ),
                         SizedBox(height: 5),
-                        Text("O app financeiro perfeito para universitários"),
+                        Text("O app financeiro perfeito para universitários", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.green),
+                        ),
                         SizedBox(height: 15),
                         Text('Deslize →',
                         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),

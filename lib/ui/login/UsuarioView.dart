@@ -98,17 +98,7 @@ class UsuarioState extends State<UsuarioView> {
                             );
                           },
                         ),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const NotificationView(),
-                              ),
-                            );
-                          },
-                          child: const Text("Notificações"),
-                        ),
+
                       ],
                     ),
                   );
@@ -134,7 +124,14 @@ class UsuarioState extends State<UsuarioView> {
             ListTile(
               leading: const Icon(Icons.manage_accounts_outlined),
               title: const Text("Gerenciar Contas"),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => LoginView(),
+                  ),
+                );
+              },
             ),
             const Divider(),
             // Preferências
@@ -162,6 +159,7 @@ class UsuarioState extends State<UsuarioView> {
                 );
               },
             ),
+            SizedBox(height: 270),
             // Rodapé
             Padding(
               padding: const EdgeInsets.only(bottom: 16),

@@ -13,6 +13,7 @@ import 'package:fin_plus/ui/simulator/simulator_screen.dart';
 import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
 import 'package:flutter/material.dart'; // Added for Scaffold and AppBar
 import 'package:go_router/go_router.dart';
+import '../ui/budget/budget_page.dart';
 import '../ui/categories/category_list_page.dart';
 import '../ui/wallets/wallet_list_page.dart';
 
@@ -69,12 +70,18 @@ class AppRoutes {
         name: 'reports',
         builder: (context, state) => const ReportsScreen(),
       ),
-
       GoRoute(
         path: '/simulator',
         name: 'simulator',
         builder: (context, state) => const SimulatorScreen(),
       ),
+      GoRoute(
+        path: '/budget',
+        name: 'budget',
+        builder: (context, state) => const BudgetPage(),
+      ),
+    ],
+
 
       // ✅ ROTA ANINHADA PARA METAS (GOALS) - AGORA DENTRO DA LISTA
       GoRoute(

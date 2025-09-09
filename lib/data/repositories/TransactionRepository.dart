@@ -207,4 +207,26 @@ class TransactionRepository {
     }
     return balance;
   }
+
+  Future<double> _getSumByTypeAndMonth(TransactionType type, DateTime date) async {
+    final db = await dbService.database;
+    final firstDayOfMonth = DateTime(date.year, date.month, 1).toIso8601String();
+    final lastDayOfMonth = DateTime(date.year, date.month + 1, 0, 23, 59, 59).toIso8601String();
+
+    final result = await db.rawQuery(
+        'SELECT SUM(amount) as total FROM transactions WHERE type = ? AND date BETWEEN ? AND ?',
+        [type.index, firstDayOfMonth, lastDayOfMonth]
+    );
+
+    final total = result.first['total'];
+    return (total is double) ? total : 0.0;
+  }
+
+  Future<double> getSumOfIncomesByMonth(DateTime date) async {
+    return _getSumByTypeAndMonth(TransactionType.income, date);
+  }
+
+  Future<double> getSumOfExpensesByMonth(DateTime date) async {
+    return _getSumByTypeAndMonth(TransactionType.expense, date);
+  }
 }

@@ -2,6 +2,7 @@ import 'package:fin_plus/data/repositories/sql_goal_repository_impl.dart';
 import 'package:fin_plus/ui/core/main_navigation_viewmodel.dart';
 import 'package:fin_plus/ui/dashboard/dashboard_viewmodel.dart';
 import 'package:fin_plus/ui/goals/my_goals_viewModel.dart';
+import 'package:fin_plus/ui/reports/reports_viewmodel.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'data/services/DatabaseService.dart';
 import 'ui/core/themes/Theme.dart';
@@ -29,6 +30,7 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => DashboardViewModel()..fetchDashboardData(),
         ),
+        ChangeNotifierProvider(create: (_) => ReportsViewModel()..fetchReportData()),
       ],
       child: const MyApp(),
     ),

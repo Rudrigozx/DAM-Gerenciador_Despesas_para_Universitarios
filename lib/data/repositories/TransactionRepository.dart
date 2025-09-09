@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart' hide Transaction;
 import '../../Models/transaction_data.dart';
 import '../services/DatabaseService.dart';
+import '../../domain/models/report_data_model.dart';
 
 class TransactionRepository {
   final dbService = DatabaseService();
@@ -43,6 +44,43 @@ class TransactionRepository {
     final expense = (totalExpense.first['total'] as num?)?.toDouble() ?? 0.0;
 
     return income - expense;
+  }
+
+  Future<ReportData> getReportData(DateTime startDate, DateTime endDate) async {
+    final db = await dbService.database;
+    final start = startDate.toIso8601String();
+    final end = endDate.toIso8601String();
+
+    // 1. Total de Receitas
+    final incomeResult = await db.rawQuery(
+      "SELECT SUM(amount) as total FROM transactions WHERE type = ? AND date BETWEEN ? AND ?",
+      [TransactionType.income.index, start, end]);
+    final totalIncome = (incomeResult.first['total'] as num?)?.toDouble() ?? 0.0;
+    
+    // 2. Total de Despesas
+    final expenseResult = await db.rawQuery(
+      "SELECT SUM(amount) as total FROM transactions WHERE type = ? AND date BETWEEN ? AND ?",
+      [TransactionType.expense.index, start, end]);
+    final totalExpenses = (expenseResult.first['total'] as num?)?.toDouble() ?? 0.0;
+
+    // 3. Despesas por Categoria (para o gráfico de pizza)
+    final categoryResult = await db.rawQuery(
+      "SELECT category, SUM(amount) as total FROM transactions WHERE type = ? AND date BETWEEN ? AND ? GROUP BY category",
+      [TransactionType.expense.index, start, end]);
+    final expensesByCategory = { for (var row in categoryResult) row['category'] as String : (row['total'] as num).toDouble() };
+
+    // 4. Evolução Mensal (para o gráfico de barras)
+    final evolutionResult = await db.rawQuery(
+      "SELECT strftime('%Y-%m', date) as month, SUM(amount) as total FROM transactions WHERE type = ? AND date BETWEEN ? AND ? GROUP BY month ORDER BY month",
+      [TransactionType.expense.index, start, end]);
+    final monthlyEvolution = { for (var row in evolutionResult) row['month'] as String : (row['total'] as num).toDouble() };
+
+    return ReportData(
+      totalIncome: totalIncome,
+      totalExpenses: totalExpenses,
+      expensesByCategory: expensesByCategory,
+      monthlyEvolution: monthlyEvolution,
+    );
   }
 
   Future<List<Map<String, dynamic>>> getBalanceEvolution({int days = 7}) async {

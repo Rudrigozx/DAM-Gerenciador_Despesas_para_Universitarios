@@ -28,12 +28,12 @@ class MainDrawer extends StatelessWidget {
             text: 'Orçamentos',
             routeName: '/budgets', // Rota a ser criada
           ),
-          _buildDrawerItem(
-            context: context,
-            icon: Icons.receipt_long_outlined,
-            text: 'Contas Fixas',
-            routeName: '/fixed-bills', // Rota a ser criada
-          ),
+          // _buildDrawerItem(
+          //   context: context,
+          //   icon: Icons.receipt_long_outlined,
+          //   text: 'Contas Fixas',
+          //   routeName: '/fixed-bills', // Rota a ser criada
+          // ),
           _buildDrawerItem(
             context: context,
             icon: Icons.trending_up_outlined,

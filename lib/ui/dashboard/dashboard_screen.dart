@@ -32,10 +32,10 @@ class DashboardScreen extends StatelessWidget {
           IconButton(icon: const Icon(Icons.notifications_none), onPressed: () {
             context.push('\teste');
           }),
-          const Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(radius: 16), // Placeholder
-          ),
+          // const Padding(
+          //   padding: EdgeInsets.only(right: 16.0),
+          //   child: CircleAvatar(radius: 16), // Placeholder
+          // ),
         ],
       ),
       body: Consumer<DashboardViewModel>(

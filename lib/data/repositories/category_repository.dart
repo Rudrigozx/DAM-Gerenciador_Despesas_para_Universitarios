@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../../Models/category.dart';
+import '../../models/category.dart';
 import '../services/DatabaseService.dart';
 
 class CategoryRepository {

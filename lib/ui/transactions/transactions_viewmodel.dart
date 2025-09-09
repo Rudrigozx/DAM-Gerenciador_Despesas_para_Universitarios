@@ -1,6 +1,6 @@
-import 'package:fin_plus/Models/category.dart';
-import 'package:fin_plus/Models/transaction_data.dart';
-import 'package:fin_plus/Models/wallet_model.dart';
+import 'package:fin_plus/models/category.dart';
+import 'package:fin_plus/models/transaction_data.dart';
+import 'package:fin_plus/models/wallet_model.dart';
 import 'package:fin_plus/data/repositories/TransactionRepository.dart';
 import 'package:fin_plus/data/repositories/category_repository.dart';
 import 'package:fin_plus/data/repositories/wallet_repository.dart';

@@ -1,6 +1,6 @@
 
 
-import '../../Models/wallet_model.dart';
+import '../../models/wallet_model.dart';
 import '../services/DatabaseService.dart';
 
 class WalletRepository {

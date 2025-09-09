@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../Models/category.dart';
+import '../../models/category.dart';
 import '../../data/repositories/category_repository.dart';
 
 class CategoryListViewModel extends ChangeNotifier {

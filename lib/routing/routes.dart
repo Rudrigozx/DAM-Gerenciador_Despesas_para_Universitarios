@@ -1,4 +1,4 @@
-import 'package:fin_plus/Models/transaction_data.dart';
+import 'package:fin_plus/models/transaction_data.dart';
 import 'package:fin_plus/domain/models/goal_model.dart';
 import 'package:fin_plus/ui/CadastroView.dart';
 import 'package:fin_plus/ui/core/main_navigation_view.dart';

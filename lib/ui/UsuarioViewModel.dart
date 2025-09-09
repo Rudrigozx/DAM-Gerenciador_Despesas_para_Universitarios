@@ -1,5 +1,5 @@
 import '/data/services/UsuarioService.dart';
-import '/Models/Usuario.dart';
+import '/models/Usuario.dart';
 
 class UsuarioViewModel {
   final UsuarioService _usuarioService = UsuarioService();

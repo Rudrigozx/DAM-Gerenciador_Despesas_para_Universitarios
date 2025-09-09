@@ -1,4 +1,4 @@
-import '/Models/Usuario.dart';
+import '/models/Usuario.dart';
 
 class UsuarioService {
   final List<Usuario> _usuarios = [];

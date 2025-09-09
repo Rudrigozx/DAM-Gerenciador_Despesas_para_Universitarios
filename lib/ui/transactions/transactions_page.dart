@@ -1,8 +1,8 @@
 
 
-import 'package:fin_plus/Models/category.dart';
-import 'package:fin_plus/Models/transaction_data.dart';
-import 'package:fin_plus/Models/wallet_model.dart';
+import 'package:fin_plus/models/category.dart';
+import 'package:fin_plus/models/transaction_data.dart';
+import 'package:fin_plus/models/wallet_model.dart';
 import 'package:fin_plus/ui/dashboard/dashboard_viewmodel.dart';
 import 'package:fin_plus/ui/transactions/transactions_viewmodel.dart';
 import 'package:flutter/material.dart';

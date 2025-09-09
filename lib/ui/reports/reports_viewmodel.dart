@@ -1,4 +1,4 @@
-import 'package:fin_plus/Models/category.dart';
+import 'package:fin_plus/models/category.dart';
 import 'package:fin_plus/data/repositories/TransactionRepository.dart';
 import 'package:fin_plus/data/repositories/category_repository.dart';
 import 'package:fin_plus/domain/models/report_data_model.dart';

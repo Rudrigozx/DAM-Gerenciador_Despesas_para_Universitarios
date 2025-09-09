@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../Models/transaction_data.dart';
+import '../../models/transaction_data.dart';
 import 'expenses_list_viewmodel.dart';
 
 class ExpensesListPage extends StatelessWidget {

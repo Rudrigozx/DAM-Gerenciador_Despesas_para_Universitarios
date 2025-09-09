@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import '../../Models/wallet_model.dart';
+import '../../models/wallet_model.dart';
 import '../../data/repositories/TransactionRepository.dart';
 import '../../data/repositories/wallet_repository.dart';
 import '../widgets/color_picker.dart';

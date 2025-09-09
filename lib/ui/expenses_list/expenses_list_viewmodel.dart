@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../Models/transaction_data.dart';
+import '../../../models/transaction_data.dart';
 import '../../data/repositories/TransactionRepository.dart';
 
 class ExpensesListViewModel extends ChangeNotifier {

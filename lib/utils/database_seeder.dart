@@ -1,9 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 
-import '../Models/category.dart';
-import '../Models/transaction_data.dart';
-import '../Models/wallet_model.dart';
+import '../models/category.dart';
+import '../models/transaction_data.dart';
+import '../models/wallet_model.dart';
 import '../data/repositories/TransactionRepository.dart';
 import '../data/repositories/category_repository.dart';
 import '../data/repositories/wallet_repository.dart';

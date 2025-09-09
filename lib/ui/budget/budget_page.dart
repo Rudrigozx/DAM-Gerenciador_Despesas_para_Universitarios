@@ -1,110 +1,79 @@
-import 'package:fin_plus/data/repositories/sql_goal_repository_impl.dart';
+import 'package:fin_plus/ui/budget/budget_viewmodel.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../data/repositories/TransactionRepository.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../domain/models/goal_model.dart';
 
-class BudgetPage extends StatefulWidget {
+class BudgetPage extends StatelessWidget {
   const BudgetPage({super.key});
 
   @override
-  State<BudgetPage> createState() => _BudgetPageState();
-}
-
-class _BudgetPageState extends State<BudgetPage> {
-  final TransactionRepository _transactionRepo = TransactionRepository();
-  final SqlGoalRepositoryImpl _goalRepo = SqlGoalRepositoryImpl();
-
-  bool _isLoading = true;
-  DateTime _selectedMonth = DateTime.now();
-  double _totalIncome = 0.0;
-  double _totalExpenses = 0.0;
-  Goal? _mainGoal;
-
-  @override
-  void initState() {
-    super.initState();
-    Intl.defaultLocale = 'pt_BR';
-    _loadDashboardData();
-  }
-
-  Future<void> _loadDashboardData() async {
-    setState(() => _isLoading = true);
-
-    final income = await _transactionRepo.getSumOfIncomesByMonth(_selectedMonth);
-    final expenses = await _transactionRepo.getSumOfExpensesByMonth(_selectedMonth);
-    final goals = await _goalRepo.getGoals();
-
-    setState(() {
-      _totalIncome = income;
-      _totalExpenses = expenses;
-      _mainGoal = goals.isNotEmpty ? goals.first : null;
-      _isLoading = false;
-    });
-  }
-
-  void _changeMonth(int increment) {
-    setState(() {
-      _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + increment, 1);
-    });
-    _loadDashboardData();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Orçamentos'),
-        elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        foregroundColor: Colors.black,
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildMonthSelector(),
-            const SizedBox(height: 16),
-            _buildSummaryCards(),
-            const SizedBox(height: 24),
-            _buildMonthlyBalanceCard(),
-            const SizedBox(height: 24),
-            if (_mainGoal != null) _buildGoalsCard(_mainGoal!),
-          ],
+    return ChangeNotifierProvider(
+      create: (_) => BudgetViewModel(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Orçamentos'),
+          elevation: 0,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          foregroundColor: Colors.black,
+        ),
+        body: Consumer<BudgetViewModel>(
+          builder: (context, viewModel, child) {
+            if (viewModel.state == BudgetViewState.loading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (viewModel.state == BudgetViewState.error) {
+              return const Center(child: Text('Erro ao carregar os dados.'));
+            }
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  _buildMonthSelector(viewModel),
+                  const SizedBox(height: 16),
+                  _buildSummaryCards(viewModel),
+                  const SizedBox(height: 24),
+                  _buildMonthlyBalanceCard(viewModel),
+                  const SizedBox(height: 24),
+                  if (viewModel.mainGoal != null) _buildGoalsCard(context, viewModel.mainGoal!),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildMonthSelector() {
+  Widget _buildMonthSelector(BudgetViewModel viewModel) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        IconButton(icon: const Icon(Icons.chevron_left), onPressed: () => _changeMonth(-1)),
+        IconButton(icon: const Icon(Icons.chevron_left), onPressed: () => viewModel.changeMonth(-1)),
         Text(
-          DateFormat('MMMM yyyy').format(_selectedMonth).toUpperCase(),
+          viewModel.formattedMonth,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        IconButton(icon: const Icon(Icons.chevron_right), onPressed: () => _changeMonth(1)),
+        IconButton(icon: const Icon(Icons.chevron_right), onPressed: () => viewModel.changeMonth(1)),
       ],
     );
   }
 
-  Widget _buildSummaryCards() {
-    final balance = _totalIncome - _totalExpenses;
+  Widget _buildSummaryCards(BudgetViewModel viewModel) {
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: _summaryCard('Receitas', _totalIncome, Colors.blue, Icons.arrow_downward)),
+            Expanded(child: _summaryCard('Receitas', viewModel.totalIncome, Colors.blue, Icons.arrow_downward)),
             const SizedBox(width: 16),
-            Expanded(child: _summaryCard('Despesas', _totalExpenses, Colors.red, Icons.arrow_upward)),
+            Expanded(child: _summaryCard('Despesas', viewModel.totalExpenses, Colors.red, Icons.arrow_upward)),
           ],
         ),
         const SizedBox(height: 16),
-        _summaryCard('Saldo', balance, Colors.green, Icons.account_balance_wallet, isLarge: true),
+        // A cor do saldo é determinada pela condição
+        _summaryCard('Saldo', viewModel.balance, viewModel.balance < 0 ? Colors.red : Colors.green, Icons.account_balance_wallet, isLarge: true),
       ],
     );
   }
@@ -118,7 +87,7 @@ class _BudgetPageState extends State<BudgetPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded( // Use Expanded para o Column de texto
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -126,13 +95,13 @@ class _BudgetPageState extends State<BudgetPage> {
                     title,
                     style: TextStyle(color: Colors.grey[600], fontSize: isLarge ? 16 : 13),
                   ),
-                  FittedBox( // Use FittedBox para garantir que o valor caiba
+                  FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
                       'R\$ ${value.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: isLarge ? 22 : 18, // Reduz um pouco o tamanho
+                        fontSize: isLarge ? 22 : 18,
                         color: color,
                       ),
                     ),
@@ -140,11 +109,11 @@ class _BudgetPageState extends State<BudgetPage> {
                 ],
               ),
             ),
-            const SizedBox(width: 8), // Espaço entre o texto e o ícone
+            const SizedBox(width: 8),
             CircleAvatar(
               backgroundColor: color.withOpacity(0.2),
-              radius: isLarge ? 28 : 24, // Ajusta o tamanho do CircleAvatar
-              child: Icon(icon, color: color, size: isLarge ? 30 : 26), // Ajusta o tamanho do ícone
+              radius: isLarge ? 28 : 24,
+              child: Icon(icon, color: color, size: isLarge ? 30 : 26),
             )
           ],
         ),
@@ -152,7 +121,7 @@ class _BudgetPageState extends State<BudgetPage> {
     );
   }
 
-  Widget _buildMonthlyBalanceCard() {
+  Widget _buildMonthlyBalanceCard(BudgetViewModel viewModel) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -166,9 +135,10 @@ class _BudgetPageState extends State<BudgetPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _balanceItem('Receitas', _totalIncome, Colors.blue),
-                _balanceItem('Despesas', _totalExpenses, Colors.red),
-                _balanceItem('Balanço', _totalIncome - _totalExpenses, Colors.green),
+                _balanceItem('Receitas', viewModel.totalIncome, Colors.blue),
+                _balanceItem('Despesas', viewModel.totalExpenses, Colors.red),
+                // A cor do Balanço é determinada pela condição
+                _balanceItem('Balanço', viewModel.balance, viewModel.balance < 0 ? Colors.red : Colors.green),
               ],
             )
           ],
@@ -190,7 +160,7 @@ class _BudgetPageState extends State<BudgetPage> {
     );
   }
 
-  Widget _buildGoalsCard(Goal goal) {
+  Widget _buildGoalsCard(BuildContext context, Goal goal) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -245,7 +215,7 @@ class _BudgetPageState extends State<BudgetPage> {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () { /* TODO: Navegar para a tela de lista de objetivos */ },
+                onPressed: () => context.push('/goals'),
                 child: const Text('VER MAIS'),
               ),
             )

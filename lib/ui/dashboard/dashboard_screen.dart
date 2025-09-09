@@ -54,7 +54,7 @@ class DashboardScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                _buildBalanceCard(context, 'Saldo total', currencyFormat.format(viewModel.totalBalance), 'Contas'),
+                _buildBalanceCard(context, 'Saldo total', currencyFormat.format(viewModel.totalBalance)),
                 const SizedBox(height: 16),
                 _buildBalanceLineChartCard(context, viewModel.balanceEvolution, currencyFormat),
                 const SizedBox(height: 16),
@@ -68,7 +68,7 @@ class DashboardScreen extends StatelessWidget {
   }
 
   // Card de Saldo com melhorias visuais
-  Widget _buildBalanceCard(BuildContext context, String title, String value, String buttonText) {
+  Widget _buildBalanceCard(BuildContext context, String title, String value) {
     final theme = Theme.of(context);
     return Card(
       elevation: 2,
@@ -82,12 +82,12 @@ class DashboardScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(value, style: theme.textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
             const SizedBox(height: 16),
-            ActionChip(
-              label: Text(buttonText),
-              onPressed: () {},
-              backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
-              labelStyle: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
-            ),
+            // ActionChip(
+            //   label: Text(buttonText),
+            //   onPressed: () {},
+            //   backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+            //   labelStyle: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+            // ),
           ],
         ),
       ),
@@ -109,12 +109,12 @@ class DashboardScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(value, style: theme.textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.error)),
             const SizedBox(height: 16),
-            ActionChip(
-              label: const Text('Ver transações'),
-              onPressed: () {},
-              backgroundColor: theme.colorScheme.error.withOpacity(0.1),
-              labelStyle: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.bold),
-            ),
+            // ActionChip(
+            //   label: const Text('Ver transações'),
+            //   onPressed: () {},
+            //   backgroundColor: theme.colorScheme.error.withOpacity(0.1),
+            //   labelStyle: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.bold),
+            // ),
           ],
         ),
       ),

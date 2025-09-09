@@ -10,7 +10,7 @@ class ReportsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A tela agora consome o ViewModel global que foi injetado pelo MultiProvider
+    // A tela agora consome o ViewModel global
     return Scaffold(
       appBar: AppBar(
         title: const Text('Relatórios'),
@@ -111,7 +111,7 @@ class ReportsScreen extends StatelessWidget {
   }
 
   Widget _summaryRow(String title, String value, {bool isBold = false}) {
-    final style = TextStyle(
+    var style = TextStyle(
       color: Colors.white,
       fontSize: 16,
       fontWeight: isBold ? FontWeight.bold : FontWeight.normal,

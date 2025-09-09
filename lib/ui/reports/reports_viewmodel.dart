@@ -57,18 +57,18 @@ class ReportsViewModel extends ChangeNotifier {
 
       // Transforma o Map<String, double> em uma List<CategoryExpense>
       _categoryExpensesData = _reportData!.expensesByCategory.entries.map((entry) {
-      final category = allCategories.firstWhere(
-        (cat) => cat.name == entry.key,
-        // ✅ CORREÇÃO APLICADA AQUI:
-        orElse: () => Category(
-          id: 0,
-          name: entry.key,
-          iconCodePoint: Icons.label.codePoint, // Usa o número do ícone
-          colorValue: Colors.grey.value,        // Usa o número da cor
-        ),
-      );
-      return CategoryExpense(category: category, amount: entry.value);
-    }).toList();
+        final category = allCategories.firstWhere(
+          (cat) => cat.name == entry.key,
+          // Cria uma categoria padrão caso não encontre uma correspondente
+          orElse: () => Category(
+            id: 0,
+            name: entry.key,
+            iconCodePoint: Icons.label.codePoint, // Usa o número do ícone
+            colorValue: Colors.grey.value,        // Usa o número da cor
+          ),
+        );
+        return CategoryExpense(category: category, amount: entry.value);
+      }).toList();
 
       _state = ViewState.success;
     } catch (e) {
@@ -87,7 +87,7 @@ class ReportsViewModel extends ChangeNotifier {
       startDate: _startDate,
       endDate: _endDate,
     );
-    
+
     // Usa o pacote 'printing' para compartilhar/salvar o PDF
     await Printing.sharePdf(bytes: pdfBytes, filename: 'relatorio_financeiro.pdf');
   }

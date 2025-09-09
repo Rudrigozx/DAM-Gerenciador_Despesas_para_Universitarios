@@ -85,7 +85,7 @@ class DatabaseService {
         nome TEXT NOT NULL,
         idade TEXT NOT NULL,
         email TEXT NOT NULL,
-        senha TEXT NOT NULL,
+        senha TEXT NOT NULL
       )
     ''');
 

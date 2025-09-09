@@ -11,6 +11,7 @@ import 'package:fin_plus/ui/home/HomePage.dart';
 import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
 import 'package:flutter/material.dart'; // Added for Scaffold and AppBar
 import 'package:go_router/go_router.dart';
+import '../ui/budget/budget_page.dart';
 import '../ui/categories/category_list_page.dart';
 import '../ui/wallets/wallet_list_page.dart';
 
@@ -62,6 +63,12 @@ class AppRoutes {
         name: 'wallets-list',
         builder: (context, state) => const WalletListPage(),
       ),
+      GoRoute(
+        path: '/budget',
+        name: 'budget',
+        builder: (context, state) => const BudgetPage(),
+      ),
+    ],
 
       // ✅ ROTA ANINHADA PARA METAS (GOALS) - AGORA DENTRO DA LISTA
       GoRoute(

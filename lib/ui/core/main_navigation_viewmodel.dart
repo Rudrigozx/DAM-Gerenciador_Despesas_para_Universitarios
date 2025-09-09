@@ -21,19 +21,19 @@ class MainNavigationViewModel extends ChangeNotifier {
   final List<BottomNavigationBarItem> items = const [
     BottomNavigationBarItem(
       icon: Icon(Icons.home),
-      label: 'Home',
+      label: 'Inicio',
     ),
     BottomNavigationBarItem(
       icon: Icon(Icons.track_changes),
-      label: 'Goals',
+      label: 'Metas',
     ),
     BottomNavigationBarItem(
       icon: Icon(Icons.receipt_long), // Ícone mais adequado para despesas
-      label: 'Expenses',
+      label: 'Transações',
     ),
     BottomNavigationBarItem(
       icon: Icon(Icons.account_balance_wallet),
-      label: 'Wallet',
+      label: 'Carteiras',
     ),
   ];
 

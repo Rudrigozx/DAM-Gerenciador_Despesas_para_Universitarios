@@ -21,14 +21,14 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(
+          create: (_) => UsuarioViewModel(),
+         ),
         ChangeNotifierProvider(create: (_) {
           final vm = NotificationViewModel();
           NotificationService.registerViewModel(vm);
           return vm;
         }),
-        ChangeNotifierProvider(
-          create: (_) => UsuarioViewModel(),
-        ),
       ],
       child: const MyApp(),
     ),

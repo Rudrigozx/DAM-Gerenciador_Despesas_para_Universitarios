@@ -1,7 +1,8 @@
+// Refatorado para usar UsuarioRepository
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import '/data/services/NotificationService.dart';
-import '/data/services/UsuarioService.dart';
+import '/data/repositories/UsuarioRepository.dart'; // Importe o novo repositório
 import '/Models/Usuario.dart';
 
 class UsuarioViewModel extends ChangeNotifier {
@@ -9,7 +10,7 @@ class UsuarioViewModel extends ChangeNotifier {
 
   Usuario? get usuario => _usuario;
 
-  final UsuarioService _usuarioService = UsuarioService();
+  final UsuarioRepository _usuarioRepository = UsuarioRepository(); // Use o repositório
 
   String? validarEmail (value){
     if (value == null || value.isEmpty) {
@@ -53,9 +54,8 @@ class UsuarioViewModel extends ChangeNotifier {
 
   Future<String?> cadastrar(String nome, String idade, String email, String senha) async {
     try {
-      // O ID será gerado pelo banco de dados, então não é necessário passá-lo aqui
       Usuario novoUsuario = Usuario.comIdade(nome, idade, email, senha);
-      await _usuarioService.cadastrarUsuario(novoUsuario);
+      await _usuarioRepository.cadastrarUsuario(novoUsuario); // Chame o método do repositório
       notifyListeners();
 
       NotificationService.showNotification(
@@ -74,28 +74,19 @@ class UsuarioViewModel extends ChangeNotifier {
     }
   }
 
-  /* void logar(String email){
-    bool emailExistente =
-    _usuarios.any((u) => u.email.toLowerCase() == usuario.email.toLowerCase());
-
-    if (emailExistente) {
-      throw Exception("Já existe um usuário com esse e-mail.");
-    }
-  }*/
-
-  // Atualize o método para buscar a lista do banco de dados
+  // Atualize o método para buscar a lista do repositório
   Future<List<Usuario>> listarUsuarios() async {
-    return _usuarioService.listarUsuarios();
+    return _usuarioRepository.listarUsuarios();
   }
 
-  // Atualize o método para buscar no banco de dados
+  // Atualize o método para buscar no repositório
   Future<Usuario?> buscarPorEmail(String email) async {
-    return _usuarioService.buscarPorEmail(email);
+    return _usuarioRepository.buscarPorEmail(email);
   }
 
-  // Atualize o método para buscar no banco de dados
+  // Atualize o método para buscar no repositório
   Future<Usuario?> buscarPorId(int id) async {
-    return _usuarioService.buscarPorId(id);
+    return _usuarioRepository.buscarPorId(id);
   }
 
   void atualizarUsuario(String nome, String idade, String email, String senha) {
@@ -104,9 +95,8 @@ class UsuarioViewModel extends ChangeNotifier {
       _usuario!.idade = idade;
       _usuario!.email = email;
       _usuario!.senha = senha;
+      _usuarioRepository.atualizarUsuario(_usuario!); // Chame o método de atualização do repositório
     }
-    // Notifique a UI sobre a alteração
     notifyListeners();
   }
-
 }

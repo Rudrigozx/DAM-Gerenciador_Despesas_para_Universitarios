@@ -26,6 +26,7 @@ class DatabaseService {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+
     await db.execute('''
       CREATE TABLE transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -80,13 +81,13 @@ class DatabaseService {
 
     await db.execute('''
       CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT NOT NULL,
         idade TEXT NOT NULL,
         email TEXT NOT NULL,
         senha TEXT NOT NULL,
-        id INTEGER PRIMARY PRIMARY KEY AUTOINCREMENT,
-
       )
     ''');
+
   }
 }

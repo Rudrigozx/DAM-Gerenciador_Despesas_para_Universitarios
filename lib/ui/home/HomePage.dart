@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // Página 1
                 Container(
-                  color: Colors.yellow.withOpacity(0.8),
+                  color: Colors.yellow.withOpacity(0.77),
                   child:  Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
 
                 // Página 2
                 Container(
-                  color: Colors.yellow.withOpacity(0.8),
+                  color: Colors.yellow.withOpacity(0.77),
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -83,7 +83,7 @@ class _HomePageState extends State<HomePage> {
 
                 // Página 3 (com botão)
                 Container(
-                  color: Colors.yellow.withOpacity(0.8),
+                  color: Colors.yellow.withOpacity(0.77),
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

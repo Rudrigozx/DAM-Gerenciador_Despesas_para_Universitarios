@@ -1,10 +1,10 @@
 // lib/ui/home/my_goals_view.dart
-import 'package:fin_plus/data/repositories/sql_goal_repository_impl.dart';
 import 'package:fin_plus/ui/goals/my_goals_viewModel.dart';
 import 'package:fin_plus/ui/widgets/goal_card.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'new_goal_view.dart';
+
 
 class MyGoalsView extends StatelessWidget {
   const MyGoalsView({super.key});
@@ -12,40 +12,37 @@ class MyGoalsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Injeta o ViewModel na árvore de widgets
-    return ChangeNotifierProvider(
-      create: (_) => MyGoalsViewModel(SqlGoalRepositoryImpl())..fetchGoals(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Minhas Metas'),
-        ),
-        body: Consumer<MyGoalsViewModel>(
-          builder: (context, viewModel, child) {
-            return Column(
-              children: [
-                _buildCategoryFilters(context, viewModel),
-                Expanded(child: _buildBody(context, viewModel)),
-              ],
-            );
-          },
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const NewGoalView()),
-            ).then((_) {
-              // Recarrega as metas quando voltar da tela de criação
-              Provider.of<MyGoalsViewModel>(context, listen: false).fetchGoals();
-            });
-          },
-          child: const Icon(Icons.add),
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Minhas Metas'),
+      ),
+      body: Consumer<MyGoalsViewModel>(
+        builder: (context, viewModel, child) {
+          return Column(
+            children: [
+              _buildCategoryFilters(context, viewModel),
+              Expanded(child: _buildBody(context, viewModel)),
+            ],
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'my_goals_fab',
+        onPressed: () async {
+          await context.push('/goals/new');
+    
+          if(!context.mounted) return;
+          
+            Provider.of<MyGoalsViewModel>(context, listen: false).fetchGoals();
+        
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
 
   Widget _buildCategoryFilters(BuildContext context, MyGoalsViewModel viewModel) {
-    const categories = ['Todas', 'Viagens', 'Estudos', 'Veículo'];
+    const categories = ['Todas', 'Viagem', 'Estudos', 'Veículo'];
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: SizedBox(

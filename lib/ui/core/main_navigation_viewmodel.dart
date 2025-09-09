@@ -11,15 +11,31 @@ class MainNavigationViewModel extends ChangeNotifier {
   int get currentIndex => _currentIndex;
 
   // Lista das telas que serão exibidas em cada aba.
-  // A ordem DEVE corresponder à ordem dos itens na BottomNavigationBar.
-  final List<Widget> _screens = [
+  final List<Widget> screens = [
     const HomePlaceholderView(),
-    const MyGoalsView(), // Nossa tela já existente!
+    const MyGoalsView(),
     const ExpensesListPage(),
     const WalletListPage(),
   ];
 
-  List<Widget> get screens => _screens;
+  final List<BottomNavigationBarItem> items = const [
+    BottomNavigationBarItem(
+      icon: Icon(Icons.home),
+      label: 'Home',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.track_changes),
+      label: 'Goals',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.receipt_long), // Ícone mais adequado para despesas
+      label: 'Expenses',
+    ),
+    BottomNavigationBarItem(
+      icon: Icon(Icons.account_balance_wallet),
+      label: 'Wallet',
+    ),
+  ];
 
   void onTabTapped(int index) {
     if (_currentIndex != index) {

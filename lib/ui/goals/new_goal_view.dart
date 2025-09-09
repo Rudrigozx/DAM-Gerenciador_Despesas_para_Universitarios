@@ -59,6 +59,7 @@ class NewGoalView extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
                   ElevatedButton(
+                    
                     onPressed: viewModel.isLoading ? null : () async {
                       final success = await viewModel.createGoal();
                       if (success) {

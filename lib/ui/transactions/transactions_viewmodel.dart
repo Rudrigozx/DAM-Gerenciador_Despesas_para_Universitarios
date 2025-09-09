@@ -46,9 +46,10 @@ class TransactionViewModel extends ChangeNotifier {
   String? _selectedSourceAccount;
   String? _selectedDestinationAccount;
   Repetition _repetition = Repetition.none;
-  bool _isLoading = false;
+  ViewState _state = ViewState.idle;
   List<Category> _availableCategories = [];
   List<Wallet> _availableWallets = [];
+  String? errorMessage;
 
   //-------------------------------------------------
   // GETTERS (Para a View ler o estado)
@@ -60,9 +61,10 @@ class TransactionViewModel extends ChangeNotifier {
   String? get selectedSourceAccount => _selectedSourceAccount;
   String? get selectedDestinationAccount => _selectedDestinationAccount;
   Repetition get repetition => _repetition;
-  bool get isLoading => _isLoading;
+  ViewState get state => _state;
   List<Category> get availableCategories => _availableCategories;
   List<Wallet> get availableWallets => _availableWallets;
+
   Color get headerColor {
     switch (_currentType) {
       case TransactionType.income: return Colors.green;
@@ -70,6 +72,7 @@ class TransactionViewModel extends ChangeNotifier {
       case TransactionType.transfer: return Colors.blue;
     }
   }
+
   String get formattedDate {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -82,44 +85,53 @@ class TransactionViewModel extends ChangeNotifier {
   }
 
   //-------------------------------------------------
-  // MÉTODOS (Para a View interagir)
+  // MÉTODOS (Lógica de Negócios)
   //-------------------------------------------------
+
+  void _setState(ViewState newState) {
+    _state = newState;
+    notifyListeners();
+  }
 
   void setTabController(TabController controller) {
     tabController = controller;
-    tabController.index = _currentType.index;
     tabController.addListener(_handleTabSelection);
   }
 
   void _handleTabSelection() {
     if (!tabController.indexIsChanging) {
       _currentType = TransactionType.values[tabController.index];
+      _selectedSourceAccount = null;
+      _selectedDestinationAccount = null;
       notifyListeners();
     }
   }
 
   Future<void> loadInitialData() async {
-    _isLoading = true;
-    notifyListeners();
+    _setState(ViewState.loading);
+    try {
+      _availableCategories = await _categoryRepository.getAllCategories();
+      _availableWallets = await _walletRepository.getAllWallets();
 
-    _availableCategories = await _categoryRepository.getAllCategories();
-    _availableWallets = await _walletRepository.getAllWallets();
+      if (isEditMode) {
+        final tx = _transactionToEdit!;
+        descriptionController.text = tx.description;
+        amountController.text = tx.amount.toStringAsFixed(2).replaceAll('.', ',');
+        _selectedDate = tx.date;
+        _selectedSourceAccount = tx.sourceAccount;
+        _selectedDestinationAccount = tx.destinationAccount;
 
-    if (isEditMode) {
-      final tx = _transactionToEdit!;
-      descriptionController.text = tx.description;
-      amountController.text = tx.amount.toStringAsFixed(2).replaceAll('.', ',');
-      _selectedDate = tx.date;
-      _selectedSourceAccount = tx.sourceAccount;
-      _selectedDestinationAccount = tx.destinationAccount;
-      try {
-        _selectedCategory = _availableCategories.firstWhere((cat) => cat.name == tx.category);
-      } catch (e) {
-        _selectedCategory = null;
+        try {
+          _selectedCategory = _availableCategories.firstWhere((cat) => cat.name == tx.category);
+        } catch (e) {
+          _selectedCategory = null;
+        }
       }
+      _setState(ViewState.idle);
+    } catch (e) {
+      errorMessage = "Erro ao carregar dados iniciais.";
+      _setState(ViewState.error);
     }
-    _isLoading = false;
-    notifyListeners();
   }
 
   Future<void> selectDate(BuildContext context) async {
@@ -148,26 +160,23 @@ class TransactionViewModel extends ChangeNotifier {
     }
     notifyListeners();
   }
-  
+
   void setRepetition(int index) {
-      _repetition = Repetition.values[index];
-      notifyListeners();
+    _repetition = Repetition.values[index];
+    notifyListeners();
   }
 
-  Future<void> saveOrUpdateTransaction() async {
-    // Validações
-    if (_selectedCategory == null || descriptionController.text.isEmpty) {
-      // TODO: Exibir erro na UI
-      return;
+  Future<bool> saveOrUpdateTransaction() async {
+    if (!_validateInputs()) {
+      return false;
     }
 
-    _isLoading = true;
-    notifyListeners();
+    _setState(ViewState.loading);
 
     final amount = double.tryParse(amountController.text.replaceAll(',', '.')) ?? 0.0;
     final transaction = Transaction(
       id: _transactionToEdit?.id,
-      description: descriptionController.text,
+      description: descriptionController.text.trim(),
       amount: amount,
       category: _selectedCategory!.name,
       type: _currentType,
@@ -176,15 +185,61 @@ class TransactionViewModel extends ChangeNotifier {
       destinationAccount: _selectedDestinationAccount,
     );
 
-    if (isEditMode) {
-      await _transactionRepository.updateTransaction(transaction);
-    } else {
-      await _transactionRepository.addTransaction(transaction);
+    try {
+      if (isEditMode) {
+        await _transactionRepository.updateTransaction(transaction);
+      } else {
+        await _transactionRepository.addTransaction(transaction);
+      }
+      await _dashboardViewModel.fetchDashboardData();
+      _setState(ViewState.success);
+      return true;
+    } catch (e) {
+      errorMessage = "Erro ao salvar a transação.";
+      _setState(ViewState.error);
+      return false;
+    }
+  }
+
+  bool _validateInputs() {
+    if (amountController.text.isEmpty || (double.tryParse(amountController.text.replaceAll(',', '.')) ?? 0.0) <= 0) {
+      errorMessage = "O valor da transação deve ser maior que zero.";
+      notifyListeners();
+      return false;
+    }
+    if (descriptionController.text.trim().isEmpty) {
+      errorMessage = "A descrição é obrigatória.";
+      notifyListeners();
+      return false;
+    }
+    if (_selectedCategory == null) {
+      errorMessage = "Selecione uma categoria.";
+      notifyListeners();
+      return false;
+    }
+    if (_currentType == TransactionType.expense && _selectedSourceAccount == null) {
+      errorMessage = "Selecione a conta de origem.";
+      notifyListeners();
+      return false;
+    }
+    if (_currentType == TransactionType.income && _selectedDestinationAccount == null) {
+      errorMessage = "Selecione a conta de destino.";
+      notifyListeners();
+      return false;
+    }
+    if (_currentType == TransactionType.transfer && (_selectedSourceAccount == null || _selectedDestinationAccount == null)) {
+      errorMessage = "Selecione as contas de origem e destino.";
+      notifyListeners();
+      return false;
+    }
+    if (_selectedDate.isAfter(DateTime.now())) {
+      errorMessage = "A data da transação não pode ser no futuro.";
+      notifyListeners();
+      return false;
     }
 
-    await _dashboardViewModel.fetchDashboardData();
-    _isLoading = false;
-    notifyListeners();
+    errorMessage = null;
+    return true;
   }
 
   //-------------------------------------------------

@@ -4,11 +4,16 @@ import 'package:fin_plus/Models/category.dart';
 import 'package:fin_plus/Models/transaction_data.dart';
 import 'package:fin_plus/Models/wallet_model.dart';
 import 'package:fin_plus/ui/dashboard/dashboard_viewmodel.dart';
-import 'package:fin_plus/ui/transactions/TransactionViewModel.dart';
+import 'package:fin_plus/ui/transactions/transactions_viewmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../utils/currency_input_formatter.dart';
+import '../dashboard/dashboard_viewmodel.dart';
+
+// O Widget principal permanece o mesmo, apenas criando o Provider.
 class TransactionsPage extends StatelessWidget {
   final TransactionType initialType;
   final Transaction? transactionToEdit;
@@ -21,6 +26,7 @@ class TransactionsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Usamos o .value para prover uma instância já existente do DashboardViewModel
     return ChangeNotifierProvider(
       create: (ctx) => TransactionViewModel(
         initialType: initialType,
@@ -32,6 +38,7 @@ class TransactionsPage extends StatelessWidget {
   }
 }
 
+// O State agora só gerencia o TabController.
 class _TransactionViewBody extends StatefulWidget {
   const _TransactionViewBody();
 
@@ -40,6 +47,7 @@ class _TransactionViewBody extends StatefulWidget {
 }
 
 class _TransactionViewBodyState extends State<_TransactionViewBody> with SingleTickerProviderStateMixin {
+
   @override
   void initState() {
     super.initState();
@@ -49,13 +57,28 @@ class _TransactionViewBodyState extends State<_TransactionViewBody> with SingleT
       vsync: this,
       initialIndex: viewModel.currentType.index,
     );
+    // Apenas passamos o controller para o ViewModel, que vai gerenciá-lo.
     viewModel.setTabController(tabController);
   }
 
   @override
   Widget build(BuildContext context) {
+    // Usamos 'watch' para reconstruir a tela quando o ViewModel notificar mudanças.
     final viewModel = context.watch<TransactionViewModel>();
     final theme = Theme.of(context);
+
+    // Ouve as mensagens de erro do ViewModel para exibir um SnackBar
+    if (viewModel.errorMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(viewModel.errorMessage!),
+            backgroundColor: Colors.red,
+          ),
+        );
+        viewModel.errorMessage = null; // Limpa o erro após exibir
+      });
+    }
 
     return Scaffold(
       body: CustomScrollView(
@@ -70,6 +93,7 @@ class _TransactionViewBodyState extends State<_TransactionViewBody> with SingleT
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    // O TabBar é controlado pelo ViewModel
                     TabBar(
                       controller: viewModel.tabController,
                       indicatorColor: Colors.white,
@@ -91,21 +115,27 @@ class _TransactionViewBodyState extends State<_TransactionViewBody> with SingleT
                         controller: viewModel.amountController,
                         style: const TextStyle(fontSize: 48, color: Colors.white, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        // MODIFICAÇÕES AQUI
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          CurrencyInputFormatter(),
+                        ],
+                        // FIM DAS MODIFICAÇÕES
                         decoration: const InputDecoration(
                           border: InputBorder.none,
-                          hintText: '0,00',
+                          hintText: 'R\$ 0,00',
                           hintStyle: TextStyle(color: Colors.white70),
-                          prefixText: 'R\$ ',
-                          prefixStyle: TextStyle(fontSize: 24, color: Colors.white70, fontWeight: FontWeight.normal),
                         ),
                       ),
                     ),
+
                   ],
                 ),
               ),
             ),
           ),
+          // A View apenas lê os dados do ViewModel para construir a UI
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
@@ -117,24 +147,22 @@ class _TransactionViewBodyState extends State<_TransactionViewBody> with SingleT
                     decoration: const InputDecoration(labelText: 'Descrição', icon: Icon(Icons.edit_outlined)),
                   ),
                   const SizedBox(height: 16),
-                  
-                  // Campos de seleção que abrem diálogos
+
                   _buildInputRow(
                     icon: viewModel.selectedCategory?.icon ?? Icons.category_outlined,
                     label: 'Categoria',
                     value: viewModel.selectedCategory?.name ?? 'Selecione',
                     onTap: () => _showCategorySelectionDialog(context, viewModel),
                   ),
-                  
-                  // Renderização condicional dos campos de conta
+
                   if (viewModel.currentType == TransactionType.income)
-                     _buildInputRow(
-                       icon: Icons.account_balance_wallet_outlined,
-                       label: 'Depositar em',
-                       value: viewModel.selectedDestinationAccount ?? 'Selecione',
-                       onTap: () => _showWalletSelectionDialog(context, viewModel, isSource: false),
-                     ),
-                  
+                    _buildInputRow(
+                      icon: Icons.account_balance_wallet_outlined,
+                      label: 'Depositar em',
+                      value: viewModel.selectedDestinationAccount ?? 'Selecione',
+                      onTap: () => _showWalletSelectionDialog(context, viewModel, isSource: false),
+                    ),
+
                   if (viewModel.currentType == TransactionType.expense)
                     _buildInputRow(
                       icon: Icons.payment_outlined,
@@ -142,7 +170,7 @@ class _TransactionViewBodyState extends State<_TransactionViewBody> with SingleT
                       value: viewModel.selectedSourceAccount ?? 'Selecione',
                       onTap: () => _showWalletSelectionDialog(context, viewModel, isSource: true),
                     ),
-                  
+
                   if (viewModel.currentType == TransactionType.transfer) ...[
                     _buildInputRow(
                       icon: Icons.arrow_upward_outlined,
@@ -176,7 +204,7 @@ class _TransactionViewBodyState extends State<_TransactionViewBody> with SingleT
                         viewModel.repetition == Repetition.fixed,
                         viewModel.repetition == Repetition.installment,
                       ],
-                      onPressed: viewModel.setRepetition,
+                      onPressed: viewModel.setRepetition, // Ação delegada ao ViewModel
                       borderRadius: BorderRadius.circular(8.0),
                       children: const [
                         Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Não Repetir')),
@@ -193,11 +221,13 @@ class _TransactionViewBodyState extends State<_TransactionViewBody> with SingleT
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await viewModel.saveOrUpdateTransaction();
-          if (mounted && (viewModel.selectedCategory != null && viewModel.descriptionController.text.isNotEmpty)) context.pop();
+          // Ação de salvar é delegada ao ViewModel
+          final success = await viewModel.saveOrUpdateTransaction();
+          // Se for sucesso, fecha a tela
+          if (mounted && success) context.pop();
         },
         backgroundColor: viewModel.headerColor,
-        child: viewModel.isLoading
+        child: viewModel.state == ViewState.loading
             ? const CircularProgressIndicator(color: Colors.white)
             : const Icon(Icons.check, color: Colors.white),
       ),
@@ -206,7 +236,6 @@ class _TransactionViewBodyState extends State<_TransactionViewBody> with SingleT
   }
 }
 
-// Funções de Diálogo extraídas para manter o build limpo
 Future<void> _showWalletSelectionDialog(BuildContext context, TransactionViewModel viewModel, {required bool isSource}) async {
   final selected = await showDialog<Wallet>(
     context: context,
@@ -233,6 +262,7 @@ Future<void> _showWalletSelectionDialog(BuildContext context, TransactionViewMod
         TextButton(
           onPressed: () {
             Navigator.of(ctx).pop();
+            // Navega para a tela de carteiras e recarrega os dados quando voltar
             context.push('/wallets').then((_) => viewModel.loadInitialData());
           },
           child: const Text('GERENCIAR CARTEIRAS'),
@@ -275,6 +305,7 @@ Future<void> _showCategorySelectionDialog(BuildContext context, TransactionViewM
         TextButton(
           onPressed: () {
             Navigator.of(ctx).pop();
+            // Navega para a tela de categorias e recarrega os dados quando voltar
             context.push('/categories').then((_) => viewModel.loadInitialData());
           },
           child: const Text('GERENCIAR'),
@@ -288,7 +319,6 @@ Future<void> _showCategorySelectionDialog(BuildContext context, TransactionViewM
   }
 }
 
-// Widget auxiliar para as linhas de input
 Widget _buildInputRow({
   required IconData icon,
   required String label,

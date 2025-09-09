@@ -12,7 +12,8 @@ class ExpensesListViewModel extends ChangeNotifier {
   DateTime get selectedMonth => _selectedMonth;
 
   List<Transaction> _transactions = [];
-  // Agrupa as transações por data para a UI
+  List<Transaction> get transactions => _transactions;
+
   Map<DateTime, List<Transaction>> get groupedTransactions {
     final map = <DateTime, List<Transaction>>{};
     for (var tx in _transactions) {
@@ -44,7 +45,6 @@ class ExpensesListViewModel extends ChangeNotifier {
 
   Future<void> deleteTransaction(int id) async {
     await _repository.deleteTransaction(id);
-    // Após deletar, busca os dados novamente para atualizar a lista
     fetchTransactions();
   }
 }

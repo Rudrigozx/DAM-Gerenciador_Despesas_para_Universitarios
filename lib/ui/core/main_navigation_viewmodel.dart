@@ -1,6 +1,6 @@
 // lib/ui/core/main_navigation_viewmodel.dart
 import 'package:fin_plus/ui/dashboard/dashboard_screen.dart';
-import 'package:fin_plus/ui/expenses_list/ExpensesListPage.dart';
+import 'package:fin_plus/ui/expenses_list/expenses_list_page.dart';
 import 'package:fin_plus/ui/goals/my_goals_view.dart';
 import 'package:flutter/material.dart';
 import '../wallets/wallet_list_page.dart';

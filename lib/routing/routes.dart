@@ -2,7 +2,7 @@ import 'package:fin_plus/Models/transaction_data.dart';
 import 'package:fin_plus/domain/models/goal_model.dart';
 import 'package:fin_plus/ui/CadastroView.dart';
 import 'package:fin_plus/ui/core/main_navigation_view.dart';
-import 'package:fin_plus/ui/expenses_list/ExpensesListPage.dart';
+import 'package:fin_plus/ui/expenses_list/expenses_list_page.dart';
 import 'package:fin_plus/ui/goals/edit_goal_screen.dart';
 import 'package:fin_plus/ui/goals/goal_details_screen.dart';
 import 'package:fin_plus/ui/goals/my_goals_view.dart';
@@ -10,7 +10,7 @@ import 'package:fin_plus/ui/goals/new_goal_view.dart';
 import 'package:fin_plus/ui/home/HomePage.dart';
 import 'package:fin_plus/ui/reports/reports_screen.dart';
 import 'package:fin_plus/ui/simulator/simulator_screen.dart';
-import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
+import 'package:fin_plus/ui/transactions/transactions_page.dart';
 import 'package:flutter/material.dart'; // Added for Scaffold and AppBar
 import 'package:go_router/go_router.dart';
 import '../ui/budget/budget_page.dart';

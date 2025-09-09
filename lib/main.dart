@@ -26,7 +26,9 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => MyGoalsViewModel(SqlGoalRepositoryImpl())..fetchGoals(),
         ),
-        ChangeNotifierProvider(create: (_) => DashboardViewModel()),
+        ChangeNotifierProvider(
+          create: (_) => DashboardViewModel()..fetchDashboardData(),
+        ),
       ],
       child: const MyApp(),
     ),

@@ -1,17 +1,15 @@
+
+
+import 'package:fin_plus/Models/category.dart';
+import 'package:fin_plus/Models/transaction_data.dart';
+import 'package:fin_plus/Models/wallet_model.dart';
+import 'package:fin_plus/ui/dashboard/dashboard_viewmodel.dart';
+import 'package:fin_plus/ui/transactions/TransactionViewModel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
-import '../../Models/category.dart';
-import '../../Models/transaction_data.dart';
-import '../../Models/wallet_model.dart';
-import '../../data/repositories/TransactionRepository.dart';
-import '../../data/repositories/category_repository.dart';
-import '../../data/repositories/wallet_repository.dart';
-
-enum Repetition { none, fixed, installment }
-
-class TransactionsPage extends StatefulWidget {
+class TransactionsPage extends StatelessWidget {
   final TransactionType initialType;
   final Transaction? transactionToEdit;
 
@@ -22,252 +20,43 @@ class TransactionsPage extends StatefulWidget {
   });
 
   @override
-  State<TransactionsPage> createState() => _TransactionsPageState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (ctx) => TransactionViewModel(
+        initialType: initialType,
+        transactionToEdit: transactionToEdit,
+        dashboardViewModel: ctx.read<DashboardViewModel>(),
+      ),
+      child: const _TransactionViewBody(),
+    );
+  }
 }
 
-class _TransactionsPageState extends State<TransactionsPage> with SingleTickerProviderStateMixin {
-  final TransactionRepository _transactionRepository = TransactionRepository();
-  final CategoryRepository _categoryRepository = CategoryRepository();
-  final WalletRepository _walletRepository = WalletRepository();
+class _TransactionViewBody extends StatefulWidget {
+  const _TransactionViewBody();
 
-  final TextEditingController descriptionController = TextEditingController();
-  final TextEditingController amountController = TextEditingController();
-  late TabController _tabController;
+  @override
+  State<_TransactionViewBody> createState() => _TransactionViewBodyState();
+}
 
-  late TransactionType _currentType;
-  DateTime _selectedDate = DateTime.now();
-  Category? _selectedCategory;
-  String? _selectedSourceAccount;
-  String? _selectedDestinationAccount;
-  Repetition _repetition = Repetition.none;
-  bool _isLoading = false;
-
-  List<Category> _availableCategories = [];
-  List<Wallet> _availableWallets = [];
-
-  final List<String> accounts = ['Carteira', 'Conta Corrente', 'Cartão de Crédito', 'Reserva'];
-
+class _TransactionViewBodyState extends State<_TransactionViewBody> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _currentType = widget.initialType;
-    _loadInitialData();
-
-    _tabController = TabController(
+    final viewModel = context.read<TransactionViewModel>();
+    final tabController = TabController(
       length: 3,
       vsync: this,
-      initialIndex: _currentType.index,
+      initialIndex: viewModel.currentType.index,
     );
-    _tabController.addListener(_handleTabSelection);
-  }
-
-  Future<void> _loadInitialData() async {
-    final categories = await _categoryRepository.getAllCategories();
-    final wallets = await _walletRepository.getAllWallets();
-    setState(() {
-      _availableCategories = categories;
-      _availableWallets = wallets;
-
-      if (widget.transactionToEdit != null) {
-        final tx = widget.transactionToEdit!;
-        _currentType = tx.type;
-        descriptionController.text = tx.description;
-        amountController.text = tx.amount.toStringAsFixed(2).replaceAll('.', ',');
-        _selectedDate = tx.date;
-        _selectedSourceAccount = tx.sourceAccount;
-        _selectedDestinationAccount = tx.destinationAccount;
-        _tabController.index = tx.type.index;
-
-        try {
-          _selectedCategory = _availableCategories.firstWhere((cat) => cat.name == tx.category);
-        } catch (e) {
-          _selectedCategory = null;
-        }
-      }
-    });
-  }
-
-  void _handleTabSelection() {
-    if (!_tabController.indexIsChanging) {
-      setState(() {
-        _currentType = TransactionType.values[_tabController.index];
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _tabController.removeListener(_handleTabSelection);
-    _tabController.dispose();
-    descriptionController.dispose();
-    amountController.dispose();
-    super.dispose();
-  }
-
-  Color get headerColor {
-    switch (_currentType) {
-      case TransactionType.income: return Colors.green;
-      case TransactionType.expense: return Colors.red;
-      case TransactionType.transfer: return Colors.blue;
-    }
-  }
-
-  String get formattedDate {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final selectedDay = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-
-    if (selectedDay == today) return 'Hoje';
-    if (selectedDay == yesterday) return 'Ontem';
-    return DateFormat('dd/MM/yyyy').format(_selectedDate);
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() => _selectedDate = picked);
-    }
-  }
-
-  Future<void> _showWalletSelectionDialog({required bool isSource}) async {
-    final selected = await showDialog<Wallet>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isSource ? 'Pagar com' : 'Depositar em'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: _availableWallets.isEmpty
-              ? const Text('Nenhuma carteira cadastrada.')
-              : ListView.builder(
-            shrinkWrap: true,
-            itemCount: _availableWallets.length,
-            itemBuilder: (context, index) {
-              final wallet = _availableWallets[index];
-              return ListTile(
-                leading: CircleAvatar(backgroundColor: wallet.color, child: Icon(wallet.icon, color: Colors.white, size: 20)),
-                title: Text(wallet.name),
-                onTap: () => Navigator.of(context).pop(wallet),
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.push('/wallets').then((_) => _loadInitialData());
-            },
-            child: const Text('GERENCIAR CARTEIRAS'),
-          )
-        ],
-      ),
-    );
-
-    if (selected != null) {
-      setState(() {
-        if (isSource) {
-          _selectedSourceAccount = selected.name;
-        } else {
-          _selectedDestinationAccount = selected.name;
-        }
-      });
-    }
-  }
-
-  Future<void> _showCategorySelectionDialog() async {
-    final selected = await showDialog<Category>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Selecione uma Categoria'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: _availableCategories.isEmpty
-              ? const Text('Nenhuma categoria cadastrada.')
-              : ListView.builder(
-            shrinkWrap: true,
-            itemCount: _availableCategories.length,
-            itemBuilder: (context, index) {
-              final category = _availableCategories[index];
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: category.color,
-                  child: Icon(category.icon, color: Colors.white, size: 20),
-                ),
-                title: Text(category.name),
-                onTap: () {
-                  Navigator.of(context).pop(category);
-                },
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.push('/categories').then((_) => _loadInitialData());
-            },
-            child: const Text('GERENCIAR'),
-          )
-        ],
-      ),
-    );
-
-    if (selected != null) {
-      setState(() {
-        _selectedCategory = selected;
-      });
-    }
-  }
-
-  Future<void> saveOrUpdateTransaction() async {
-    if (_selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, selecione uma categoria.'), backgroundColor: Colors.red),
-      );
-      return;
-    }
-    if ((_currentType == TransactionType.expense || _currentType == TransactionType.transfer) && _selectedSourceAccount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecione uma conta de origem.'), backgroundColor: Colors.red));
-      return;
-    }
-    if ((_currentType == TransactionType.income || _currentType == TransactionType.transfer) && _selectedDestinationAccount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Selecione uma conta de destino.'), backgroundColor: Colors.red));
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    final amount = double.tryParse(amountController.text.replaceAll(',', '.')) ?? 0.0;
-
-    final transaction = Transaction(
-      id: widget.transactionToEdit?.id,
-      description: descriptionController.text,
-      amount: amount,
-      category: _selectedCategory!.name,
-      type: _currentType,
-      date: _selectedDate,
-      sourceAccount: _selectedSourceAccount,
-      destinationAccount: _selectedDestinationAccount,
-    );
-
-    if (widget.transactionToEdit == null) {
-      await _transactionRepository.addTransaction(transaction);
-    } else {
-      await _transactionRepository.updateTransaction(transaction);
-    }
-
-    if (mounted) context.pop();
+    viewModel.setTabController(tabController);
   }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<TransactionViewModel>();
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -275,14 +64,14 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
             automaticallyImplyLeading: true,
             pinned: true,
             expandedHeight: 220.0,
-            backgroundColor: headerColor,
+            backgroundColor: viewModel.headerColor,
             flexibleSpace: FlexibleSpaceBar(
               background: SafeArea(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TabBar(
-                      controller: _tabController,
+                      controller: viewModel.tabController,
                       indicatorColor: Colors.white,
                       labelColor: Colors.white,
                       unselectedLabelColor: Colors.white.withOpacity(0.7),
@@ -299,7 +88,7 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                       child: TextFormField(
-                        controller: amountController,
+                        controller: viewModel.amountController,
                         style: const TextStyle(fontSize: 48, color: Colors.white, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -324,66 +113,70 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextFormField(
-                    controller: descriptionController,
+                    controller: viewModel.descriptionController,
                     decoration: const InputDecoration(labelText: 'Descrição', icon: Icon(Icons.edit_outlined)),
                   ),
                   const SizedBox(height: 16),
-
+                  
+                  // Campos de seleção que abrem diálogos
                   _buildInputRow(
-                    icon: _selectedCategory?.icon ?? Icons.category_outlined,
+                    icon: viewModel.selectedCategory?.icon ?? Icons.category_outlined,
                     label: 'Categoria',
-                    value: _selectedCategory?.name ?? 'Selecione',
-                    onTap: _showCategorySelectionDialog,
+                    value: viewModel.selectedCategory?.name ?? 'Selecione',
+                    onTap: () => _showCategorySelectionDialog(context, viewModel),
                   ),
-
-                  if (_currentType == TransactionType.income)
-                    _buildInputRow(
-                      icon: Icons.account_balance_wallet_outlined,
-                      label: 'Depositar em',
-                      value: _selectedDestinationAccount ?? 'Selecione',
-                      onTap: () => _showWalletSelectionDialog(isSource: false),
-                    ),
-                  if (_currentType == TransactionType.expense)
+                  
+                  // Renderização condicional dos campos de conta
+                  if (viewModel.currentType == TransactionType.income)
+                     _buildInputRow(
+                       icon: Icons.account_balance_wallet_outlined,
+                       label: 'Depositar em',
+                       value: viewModel.selectedDestinationAccount ?? 'Selecione',
+                       onTap: () => _showWalletSelectionDialog(context, viewModel, isSource: false),
+                     ),
+                  
+                  if (viewModel.currentType == TransactionType.expense)
                     _buildInputRow(
                       icon: Icons.payment_outlined,
                       label: 'Pagar com',
-                      value: _selectedSourceAccount ?? 'Selecione',
-                      onTap: () => _showWalletSelectionDialog(isSource: true),
+                      value: viewModel.selectedSourceAccount ?? 'Selecione',
+                      onTap: () => _showWalletSelectionDialog(context, viewModel, isSource: true),
                     ),
-                  if (_currentType == TransactionType.transfer) ...[
+                  
+                  if (viewModel.currentType == TransactionType.transfer) ...[
                     _buildInputRow(
                       icon: Icons.arrow_upward_outlined,
                       label: 'Conta de Origem',
-                      value: _selectedSourceAccount ?? 'Selecione',
-                      onTap: () => _showWalletSelectionDialog(isSource: true),
+                      value: viewModel.selectedSourceAccount ?? 'Selecione',
+                      onTap: () => _showWalletSelectionDialog(context, viewModel, isSource: true),
                     ),
                     _buildInputRow(
                       icon: Icons.arrow_downward_outlined,
                       label: 'Conta de Destino',
-                      value: _selectedDestinationAccount ?? 'Selecione',
-                      onTap: () => _showWalletSelectionDialog(isSource: false),
+                      value: viewModel.selectedDestinationAccount ?? 'Selecione',
+                      onTap: () => _showWalletSelectionDialog(context, viewModel, isSource: false),
                     ),
                   ],
 
                   _buildInputRow(
                     icon: Icons.calendar_today_outlined,
                     label: 'Data',
-                    value: formattedDate,
-                    onTap: () => _selectDate(context),
+                    value: viewModel.formattedDate,
+                    onTap: () => viewModel.selectDate(context),
                   ),
 
                   const SizedBox(height: 24),
-                  Text('Repetir', style: Theme.of(context).textTheme.titleSmall),
+                  Text('Repetir', style: theme.textTheme.titleSmall),
                   const SizedBox(height: 8),
 
                   Center(
                     child: ToggleButtons(
                       isSelected: [
-                        _repetition == Repetition.none,
-                        _repetition == Repetition.fixed,
-                        _repetition == Repetition.installment,
+                        viewModel.repetition == Repetition.none,
+                        viewModel.repetition == Repetition.fixed,
+                        viewModel.repetition == Repetition.installment,
                       ],
-                      onPressed: (index) => setState(() => _repetition = Repetition.values[index]),
+                      onPressed: viewModel.setRepetition,
                       borderRadius: BorderRadius.circular(8.0),
                       children: const [
                         Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Não Repetir')),
@@ -399,38 +192,124 @@ class _TransactionsPageState extends State<TransactionsPage> with SingleTickerPr
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _isLoading ? null : saveOrUpdateTransaction,
-        backgroundColor: headerColor,
-        child: _isLoading
+        onPressed: () async {
+          await viewModel.saveOrUpdateTransaction();
+          if (mounted && (viewModel.selectedCategory != null && viewModel.descriptionController.text.isNotEmpty)) context.pop();
+        },
+        backgroundColor: viewModel.headerColor,
+        child: viewModel.isLoading
             ? const CircularProgressIndicator(color: Colors.white)
             : const Icon(Icons.check, color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
+}
 
-  Widget _buildInputRow({
-    required IconData icon,
-    required String label,
-    required String value,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.grey[600]),
-            const SizedBox(width: 16),
-            Text(label, style: const TextStyle(fontSize: 16)),
-            const Spacer(),
-            Text(value, style: TextStyle(fontSize: 16, color: Colors.grey[800])),
-            const SizedBox(width: 8),
-            const Icon(Icons.chevron_right, color: Colors.grey),
-          ],
+// Funções de Diálogo extraídas para manter o build limpo
+Future<void> _showWalletSelectionDialog(BuildContext context, TransactionViewModel viewModel, {required bool isSource}) async {
+  final selected = await showDialog<Wallet>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(isSource ? 'Pagar com' : 'Depositar em'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: viewModel.availableWallets.isEmpty
+            ? const Text('Nenhuma carteira cadastrada.')
+            : ListView.builder(
+          shrinkWrap: true,
+          itemCount: viewModel.availableWallets.length,
+          itemBuilder: (context, index) {
+            final wallet = viewModel.availableWallets[index];
+            return ListTile(
+              leading: CircleAvatar(backgroundColor: wallet.color, child: Icon(wallet.icon, color: Colors.white, size: 20)),
+              title: Text(wallet.name),
+              onTap: () => Navigator.of(ctx).pop(wallet),
+            );
+          },
         ),
       ),
-    );
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(ctx).pop();
+            context.push('/wallets').then((_) => viewModel.loadInitialData());
+          },
+          child: const Text('GERENCIAR CARTEIRAS'),
+        )
+      ],
+    ),
+  );
+
+  if (selected != null) {
+    viewModel.selectWallet(isSource: isSource, walletName: selected.name);
   }
+}
+
+Future<void> _showCategorySelectionDialog(BuildContext context, TransactionViewModel viewModel) async {
+  final selected = await showDialog<Category>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Selecione uma Categoria'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: viewModel.availableCategories.isEmpty
+            ? const Text('Nenhuma categoria cadastrada.')
+            : ListView.builder(
+          shrinkWrap: true,
+          itemCount: viewModel.availableCategories.length,
+          itemBuilder: (context, index) {
+            final category = viewModel.availableCategories[index];
+            return ListTile(
+              leading: CircleAvatar(
+                backgroundColor: category.color,
+                child: Icon(category.icon, color: Colors.white, size: 20),
+              ),
+              title: Text(category.name),
+              onTap: () => Navigator.of(ctx).pop(category),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(ctx).pop();
+            context.push('/categories').then((_) => viewModel.loadInitialData());
+          },
+          child: const Text('GERENCIAR'),
+        )
+      ],
+    ),
+  );
+
+  if (selected != null) {
+    viewModel.selectCategory(selected);
+  }
+}
+
+// Widget auxiliar para as linhas de input
+Widget _buildInputRow({
+  required IconData icon,
+  required String label,
+  required String value,
+  required VoidCallback onTap,
+}) {
+  return InkWell(
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.grey[600]),
+          const SizedBox(width: 16),
+          Text(label, style: const TextStyle(fontSize: 16)),
+          const Spacer(),
+          Text(value, style: TextStyle(fontSize: 16, color: Colors.grey[800])),
+          const SizedBox(width: 8),
+          const Icon(Icons.chevron_right, color: Colors.grey),
+        ],
+      ),
+    ),
+  );
 }

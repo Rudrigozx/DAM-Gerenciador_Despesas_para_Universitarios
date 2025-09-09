@@ -9,6 +9,7 @@ import 'package:fin_plus/ui/goals/my_goals_view.dart';
 import 'package:fin_plus/ui/goals/new_goal_view.dart';
 import 'package:fin_plus/ui/home/HomePage.dart';
 import 'package:fin_plus/ui/reports/reports_screen.dart';
+import 'package:fin_plus/ui/simulator/simulator_screen.dart';
 import 'package:fin_plus/ui/transactions/TransactionsPage.dart';
 import 'package:flutter/material.dart'; // Added for Scaffold and AppBar
 import 'package:go_router/go_router.dart';
@@ -67,6 +68,12 @@ class AppRoutes {
         path: '/reports',
         name: 'reports',
         builder: (context, state) => const ReportsScreen(),
+      ),
+
+      GoRoute(
+        path: '/simulator',
+        name: 'simulator',
+        builder: (context, state) => const SimulatorScreen(),
       ),
 
       // ✅ ROTA ANINHADA PARA METAS (GOALS) - AGORA DENTRO DA LISTA

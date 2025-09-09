@@ -59,6 +59,20 @@ class DatabaseService {
     ''');
 
     await db.execute('''
+    CREATE TABLE simulations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      initialAmount REAL NOT NULL,
+      monthlyContribution REAL NOT NULL,
+      annualRate REAL NOT NULL,
+      periodInMonths INTEGER NOT NULL,
+      totalInvested REAL NOT NULL,
+      totalInterest REAL NOT NULL,
+      finalAmount REAL NOT NULL
+    )
+  ''');
+
+    await db.execute('''
       CREATE TABLE wallets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,

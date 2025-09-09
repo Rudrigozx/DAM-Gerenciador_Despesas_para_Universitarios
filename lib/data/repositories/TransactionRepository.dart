@@ -52,4 +52,51 @@ class TransactionRepository {
     final List<Map<String, dynamic>> maps = await db.query('transactions');
     return List.generate(maps.length, (i) => Transaction.fromMap(maps[i]));
   }
+
+  Future<double> getCurrentBalanceForWallet(String walletName) async {
+    final db = await dbService.database;
+    double balance = 0.0;
+
+    final List<Map<String, dynamic>> incomeMaps = await db.query(
+      'transactions',
+      columns: ['amount'],
+      where: 'destinationAccount = ? AND type = ?',
+      whereArgs: [walletName, TransactionType.income.index],
+    );
+    for (var map in incomeMaps) {
+      balance += (map['amount'] as double);
+    }
+
+    final List<Map<String, dynamic>> expenseMaps = await db.query(
+      'transactions',
+      columns: ['amount'],
+      where: 'sourceAccount = ? AND type = ?',
+      whereArgs: [walletName, TransactionType.expense.index],
+    );
+    for (var map in expenseMaps) {
+      balance -= (map['amount'] as double);
+    }
+
+    final List<Map<String, dynamic>> transferInMaps = await db.query(
+      'transactions',
+      columns: ['amount'],
+      where: 'destinationAccount = ? AND type = ?',
+      whereArgs: [walletName, TransactionType.transfer.index],
+    );
+    for (var map in transferInMaps) {
+      balance += (map['amount'] as double);
+    }
+
+    final List<Map<String, dynamic>> transferOutMaps = await db.query(
+      'transactions',
+      columns: ['amount'],
+      where: 'sourceAccount = ? AND type = ?',
+      whereArgs: [walletName, TransactionType.transfer.index],
+    );
+    for (var map in transferOutMaps) {
+      balance -= (map['amount'] as double);
+    }
+
+    return balance;
+  }
 }

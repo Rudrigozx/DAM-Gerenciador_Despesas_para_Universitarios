@@ -10,13 +10,14 @@ import '/ui/home/HomePage.dart';
 
 
 import '../ui/categories/category_list_page.dart';
+import '../ui/wallets/wallet_list_page.dart';
 
 class AppRoutes {
   // Instância do GoRouter para ser usada no MaterialApp.router
   static final GoRouter router = GoRouter(
 
     // Rota inicial da aplicação
-    initialLocation: '/',
+    initialLocation: '/main',
 
     // Lista de todas as rotas da nossa aplicação
     routes: <RouteBase>[
@@ -74,6 +75,12 @@ class AppRoutes {
           );
           return TransactionsPage(initialType: type);
         },
+      ),
+
+      GoRoute(
+        path: '/wallets',
+        name: 'wallets-list',
+        builder: (context, state) => const WalletListPage(),
       ),
     ],
 

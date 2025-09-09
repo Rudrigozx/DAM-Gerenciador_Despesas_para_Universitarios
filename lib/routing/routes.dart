@@ -76,14 +76,10 @@ class AppRoutes {
         builder: (context, state) => const SimulatorScreen(),
       ),
       GoRoute(
-        path: '/budget',
+        path: '/budgets',
         name: 'budget',
         builder: (context, state) => const BudgetPage(),
       ),
-    ],
-
-
-      // ✅ ROTA ANINHADA PARA METAS (GOALS) - AGORA DENTRO DA LISTA
       GoRoute(
         path: '/goals',
         name: 'goals-list',

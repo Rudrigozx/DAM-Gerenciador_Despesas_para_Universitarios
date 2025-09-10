@@ -1,28 +1,79 @@
 import '/models/Usuario.dart';
+import 'package:sqflite/sqflite.dart';
+import '/data/services/DatabaseService.dart';
 
 class UsuarioService {
-  final List<Usuario> _usuarios = [];
+  final DatabaseService _dbService = DatabaseService();
 
-  void cadastrarUsuario(Usuario usuario) {
+  // Salva um novo usuário no banco de dados
+  Future<void> cadastrarUsuario(Usuario usuario) async {
+    final db = await _dbService.database;
+    await db.insert(
+      'users',
+      usuario.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
 
-    bool emailExistente =
-    _usuarios.any((u) => u.email.toLowerCase() == usuario.email.toLowerCase());
+  // Retorna a lista de todos os usuários do banco de dados
+  Future<List<Usuario>> listarUsuarios() async {
+    final db = await _dbService.database;
+    final List<Map<String, dynamic>> maps = await db.query('users');
+    return List.generate(maps.length, (i) {
+      return Usuario.fromMap(maps[i]);
+    });
+  }
 
-    if (emailExistente) {
-      throw Exception("Já existe um usuário com esse e-mail.");
+  // Busca um usuário por email
+  Future<Usuario?> buscarPorEmail(String email) async {
+    final db = await _dbService.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+
+    if (maps.isNotEmpty) {
+      return Usuario.fromMap(maps.first);
+    } else {
+      return null;
     }
-
-    _usuarios.add(usuario);
   }
 
-  List<Usuario> listarUsuarios() {
-    return List.unmodifiable(_usuarios);
+  // Busca um usuário por ID
+  Future<Usuario?> buscarPorId(int id) async {
+    final db = await _dbService.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return Usuario.fromMap(maps.first);
+    } else {
+      return null;
+    }
   }
 
-  Usuario? buscarPorEmail(String email) {
-    return _usuarios.firstWhere(
-          (u) => u.email.toLowerCase() == email.toLowerCase(),
-      orElse: () => throw Exception("Usuário não encontrado."),
+  // Atualiza um usuário existente
+  Future<void> atualizarUsuario(Usuario usuario) async {
+    final db = await _dbService.database;
+    await db.update(
+      'users',
+      usuario.toMap(),
+      where: 'id = ?',
+      whereArgs: [usuario.id],
+    );
+  }
+
+  // Deleta um usuário
+  Future<void> deletarUsuario(int id) async {
+    final db = await _dbService.database;
+    await db.delete(
+      'users',
+      where: 'id = ?',
+      whereArgs: [id],
     );
   }
 }

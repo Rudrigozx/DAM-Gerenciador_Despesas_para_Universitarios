@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../Login/CadastroView.dart';
 
 import '../../utils/database_seeder.dart';
 
@@ -12,74 +13,133 @@ class HomePage extends StatefulWidget {
 
 
 class _HomePageState extends State<HomePage> {
+  final PageController _controller = PageController();
+  int _currentPage = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home Page'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                context.pushNamed('new-income');
+      body: Column(
+        children: [
+          Expanded(
+            child: PageView(
+              controller: _controller,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPage = index;
+                });
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              ),
-              child: const Text('Adicionar Renda'),
-            ),
-            const SizedBox(height: 20),
+              children: [
+                // Página 1
+                Container(
+                  color: Colors.yellow.withOpacity(0.77),
+                  child:  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/logos/Logo_fin.png',
+                          height: 100,
+                          fit: BoxFit.contain,
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          'Seja Bem-vindo ao Fin+!',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
+                        ),
+                        SizedBox(height: 5),
+                        Text("O app financeiro perfeito para universitários", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.green),
+                        ),
+                        SizedBox(height: 15),
+                        Text('Deslize →',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                        )
 
-            ElevatedButton(
-              onPressed: () {
-                context.pushNamed('expenses-list');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              ),
-              child: const Text('Adicionar Despesa'),
-            ),
-            const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
+                ),
 
-            ElevatedButton(
-              onPressed: () {
-                context.pushNamed('new-transfer');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              ),
-              child: const Text('Adicionar Transferência'),
-            ),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.data_exploration_outlined),
-              label: const Text('DEV: Popular Banco de Dados'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-              onPressed: () async {
-                // Mostra um feedback para o usuário
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Populando o banco de dados... Por favor, aguarde.')),
-                );
+                // Página 2
+                Container(
+                  color: Colors.yellow.withOpacity(0.77),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                        'assets/logos/M.png',
+                          height: 252,
+                          fit: BoxFit.contain,
+                        ),
+                        Text(
+                          'Tenha controle sobre sua vida financeira',
+                          style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 12),
 
-                // Chama o seeder
-                await DatabaseSeeder().seedDatabase();
+                      ],
+                    ),
+                  ),
+                ),
 
-                // Mostra um feedback de conclusão
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Banco de dados populado com sucesso!'), backgroundColor: Colors.green),
-                );
-              },
+                // Página 3 (com botão)
+                Container(
+                  color: Colors.yellow.withOpacity(0.77),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                        'assets/logos/m12.png',
+                          height: 200,
+                          fit: BoxFit.contain,
+                        ),
+                        SizedBox(height: 10),
+                        const Text(
+                          'Enquanto mantém o rítmo dos estudos',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+
+                        SizedBox(height: 22),
+
+                        // 🔹 Botão apenas na terceira página
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const CriarConta(),
+                              ),
+                            );
+                          },
+                          child: const Text("Vamos começar"),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+
+          // Indicadores de página (bolinhas)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(3, (index) {
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                margin: const EdgeInsets.all(6),
+                width: _currentPage == index ? 20 : 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: _currentPage == index ? Colors.indigo : Colors.grey,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              );
+            }),
+          ),
+        ],
       ),
     );
   }

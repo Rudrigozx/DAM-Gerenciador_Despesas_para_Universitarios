@@ -75,7 +75,7 @@ class LoginView extends StatelessWidget {
                        senhaController.text,
                      );
         
-                    context.push('/main');
+                    context.pushReplacement('/main');
                   }
                 },
                 child: const Text("Entrar"),

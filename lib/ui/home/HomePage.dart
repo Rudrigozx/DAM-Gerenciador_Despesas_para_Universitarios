@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../Login/CadastroView.dart';
 
-import '../../utils/database_seeder.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -106,12 +104,7 @@ class _HomePageState extends State<HomePage> {
                         // 🔹 Botão apenas na terceira página
                         ElevatedButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const CriarConta(),
-                              ),
-                            );
+                            context.push('/register');
                           },
                           child: const Text("Vamos começar"),
                         ),

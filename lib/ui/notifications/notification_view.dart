@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../Models/Notification.dart';
 import 'notification_view_model.dart';
-import '/ui/notifications/notification_view.dart';
+
 
 class NotificationView extends StatelessWidget {
   const NotificationView({super.key});

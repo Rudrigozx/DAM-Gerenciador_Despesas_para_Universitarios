@@ -1,26 +1,40 @@
+import 'package:fin_plus/ui/notifications/notification_view.dart';
+import 'package:fin_plus/ui/notifications/notification_view_model.dart';
 import 'package:fin_plus/data/repositories/sql_goal_repository_impl.dart';
 import 'package:fin_plus/ui/core/main_navigation_viewmodel.dart';
 import 'package:fin_plus/ui/dashboard/dashboard_viewmodel.dart';
 import 'package:fin_plus/ui/goals/my_goals_viewModel.dart';
 import 'package:fin_plus/ui/reports/reports_viewmodel.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:fin_plus/ui/Login/UsuarioViewModel.dart';
+import 'package:fin_plus/ui/home/HomePage.dart';
+import 'package:provider/provider.dart';
 import 'data/services/DatabaseService.dart';
-import 'ui/core/themes/Theme.dart';
-import 'routing/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // 1. Importe o Provider
+import 'package:permission_handler/permission_handler.dart';
+import 'data/services/NotificationService.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // É preciso iniciar o BD e a formatação de data no inicio do APP
   await DatabaseService().database;
   await initializeDateFormatting('pt_BR', null);
+  await NotificationService.init();
+  await Permission.notification.request();
 
-  // 2. Envolva o MyApp com o MultiProvider
+
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(
+          create: (_) => UsuarioViewModel(),
+         ),
+        ChangeNotifierProvider(create: (_) {
+          final vm = NotificationViewModel();
+          NotificationService.registerViewModel(vm);
+          return vm;
+        }),
         ChangeNotifierProvider(
           create: (_) => MainNavigationViewModel(),
         ),
@@ -42,11 +56,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Fin+',
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.theme,
-      routerConfig: AppRoutes.router,
+      title: 'Fin Plus',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: HomePage(),
     );
   }
 }

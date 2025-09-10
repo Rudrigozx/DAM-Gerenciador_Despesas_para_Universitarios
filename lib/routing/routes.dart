@@ -1,6 +1,5 @@
 import 'package:fin_plus/models/transaction_data.dart';
 import 'package:fin_plus/domain/models/goal_model.dart';
-import 'package:fin_plus/ui/CadastroView.dart';
 import 'package:fin_plus/ui/core/main_navigation_view.dart';
 import 'package:fin_plus/ui/expenses_list/expenses_list_page.dart';
 import 'package:fin_plus/ui/goals/edit_goal_screen.dart';
@@ -13,12 +12,14 @@ import 'package:fin_plus/ui/simulator/simulator_screen.dart';
 import 'package:fin_plus/ui/transactions/transactions_page.dart';
 import 'package:flutter/material.dart'; // Added for Scaffold and AppBar
 import 'package:go_router/go_router.dart';
+import '../ui/Login/CadastroView.dart';
 import '../ui/budget/budget_page.dart';
 import '../ui/categories/category_list_page.dart';
 import '../ui/wallets/wallet_list_page.dart';
 
 class AppRoutes {
   static final GoRouter router = GoRouter(
+
     // Rota inicial da aplicação
     initialLocation: '/main',
     routes: <RouteBase>[

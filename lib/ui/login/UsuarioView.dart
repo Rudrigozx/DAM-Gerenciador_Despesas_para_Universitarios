@@ -151,7 +151,7 @@ class UsuarioState extends State<UsuarioView> {
               leading: const Icon(Icons.logout),
               title: const Text("Logout"),
               onTap: () {
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                     builder: (_) => LoginView(),

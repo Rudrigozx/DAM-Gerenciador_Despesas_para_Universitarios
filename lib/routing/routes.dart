@@ -7,6 +7,10 @@ import 'package:fin_plus/ui/goals/goal_details_screen.dart';
 import 'package:fin_plus/ui/goals/my_goals_view.dart';
 import 'package:fin_plus/ui/goals/new_goal_view.dart';
 import 'package:fin_plus/ui/home/HomePage.dart';
+import 'package:fin_plus/ui/home/banco.dart';
+import 'package:fin_plus/ui/Login/LoginView.dart';
+import 'package:fin_plus/ui/Login/UsuarioView.dart';
+import 'package:fin_plus/ui/notifications/notification_view.dart';
 import 'package:fin_plus/ui/reports/reports_screen.dart';
 import 'package:fin_plus/ui/simulator/simulator_screen.dart';
 import 'package:fin_plus/ui/transactions/transactions_page.dart';
@@ -21,14 +25,9 @@ class AppRoutes {
   static final GoRouter router = GoRouter(
 
     // Rota inicial da aplicação
-    initialLocation: '/main',
+    initialLocation: '/home',
     routes: <RouteBase>[
       // Rotas de nível superior
-      GoRoute(
-        path: '/',
-        name: 'signup',
-        builder: (context, state) => const CriarConta(),
-      ),
       GoRoute(
         path: '/main',
         name: 'main',
@@ -50,6 +49,31 @@ class AppRoutes {
         builder: (context, state) => const CategoryListPage(),
       ),
       GoRoute(
+        path: '/register',
+        name: 'signup',
+        builder: (context, state) => const CriarConta(),
+      ),
+      GoRoute(
+        path: '/login',
+        name: 'login',
+        builder: (context, state) => const LoginView(),
+      ),
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        builder: (context, state) => const NotificationView(),
+      ),
+      GoRoute(
+        path: '/dev-banco',
+        name: 'dev-banco',
+        builder: (context, state) => const BancoPage(),
+      ),
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => UsuarioView(),
+      ),
+      GoRoute(
         path: '/transaction/:type/new',
         name: 'new-transaction',
         builder: (context, state) {
@@ -61,6 +85,7 @@ class AppRoutes {
           return TransactionsPage(initialType: type);
         },
       ),
+
       GoRoute(
         path: '/wallets',
         name: 'wallets-list',
